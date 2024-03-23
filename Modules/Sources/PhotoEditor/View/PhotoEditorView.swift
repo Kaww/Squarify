@@ -5,27 +5,37 @@ struct EditingImage {
     let thumbnail: UIImage
     
     var sizeDescription: String {
-        "\(Int(image.size.width)) x \(Int(image.size.height))"
+        "\(Int(image.size.width.rounded())) x \(Int(image.size.height.rounded()))"
     }
 }
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
+    
+    // Services
     @StateObject private var imageSaver: Saver
     private let thumbnailLoader: any ThumbnailLoader
 
-    private let imagesToEdit: [UIImage]
+    // Data
+    private let _imagesToEdit: [UIImage]
     @State private var editingImages: [EditingImage] = []
     private let onCancel: () -> Void
 
+    // Visual State
     @State private var isProcessing = false
     @State private var showExportFinishedAlert = false
     @State private var isFinished = false
 
+    // Toolbar
     @State private var currentImageIndex = 0
 
-    @State private var borderSize: Double = 0
+    // Edition
+    @State private var selectedBorderMode = BorderMode.fixed
+    @State private var selectedBorderSize: Double = 0
+    @State private var previewBorderSize: Double = 0
+    @State private var renderingBorderSize: Double = 0
+    @State private var previewBoxingSize: CGSize = .zero
     private let minBorder: Double = 0
-    private let maxBorder: Double = 500
+    private let maxBorder: Double
 
     public init(
         imagesToEdit: [UIImage],
@@ -33,10 +43,18 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         thumbnailLoader: any ThumbnailLoader,
         onCancel: @escaping () -> Void
     ) {
-        self.imagesToEdit = imagesToEdit
+        self._imagesToEdit = imagesToEdit
         self._imageSaver = .init(wrappedValue: imageSaver)
         self.thumbnailLoader = thumbnailLoader
         self.onCancel = onCancel
+
+        let largestSize: Int = imagesToEdit.reduce(into: 100, { partialResult, image in
+            let imageLargestSide = Int(image.size.largestSide)
+            if partialResult < imageLargestSide {
+                partialResult = imageLargestSide
+            }
+        })
+        self.maxBorder = Double(Int(largestSize / 4))
     }
 
     public var body: some View {
@@ -58,9 +76,24 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Button("Show photos in gallery", action: openPhotoApp)
         }
         .preferredColorScheme(.dark)
+        .onChange(of: selectedBorderSize) { oldValue, newValue in
+            updateBorderSize(
+                selectedBorderSize: newValue,
+                previewBoxingSize: previewBoxingSize,
+                image: editingImages[currentImageIndex].image
+            )
+        }
+        .onChange(of: currentImageIndex) { oldValue, newValue in
+            updateBorderSize(
+                selectedBorderSize: selectedBorderSize,
+                previewBoxingSize: previewBoxingSize,
+                image: editingImages[newValue].image
+            )
+        }
+
     }
 
-    // MARK: Views
+    // MARK: - Views
 
     private var headerView: some View {
         HStack() {
@@ -113,7 +146,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
         ExportButton(
             isProcessing: isProcessing,
-            numberOfImages: imagesToEdit.count,
+            numberOfImages: editingImages.count,
             numberOfSavedImages: imageSaver.numberOfSavedImages,
             onTap: saveImages
         )
@@ -122,6 +155,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     private func loadedViewSpringTransition(delay: TimeInterval) -> AnyTransition {
+        if thumbnailLoader is MockThumbnailLoader {
+            return .identity
+        }
         let spring = Animation.spring.delay(delay)
         return .opacity.combined(with: .scale).animation(spring)
     }
@@ -138,8 +174,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .buttonStyle(.plain)
             .disabled(currentImageIndex <= 0)
 
-            let photo = imagesToEdit[currentImageIndex]
-            Text("Photo \(currentImageIndex + 1)/\(editingImages.count) • \(Int(photo.size.width)) x \(Int(photo.size.height))")
+            Text("Photo \(currentImageIndex + 1)/\(editingImages.count) • \(editingImages[currentImageIndex].sizeDescription)")
                 .monospacedDigit()
                 .font(.system(size: 14, weight: .regular))
                 .layoutPriority(1)
@@ -163,22 +198,73 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .padding(borderSize)
+                        .padding(previewBorderSize)
+                        .onAppear { previewBoxingSize = proxy.size }
+                        .onChange(of: proxy.size) { previewBoxingSize = $1 }
                 }
         }
         .aspectRatio(contentMode: .fit)
     }
 
     private var configView: some View {
-        VStack {
+        VStack(spacing: 16) {
+            borderModeConfigItem
+            borderSizeConfigItem
+        }
+        .padding(.horizontal)
+    }
+
+    private var borderModeConfigItem: some View {
+        HStack {
             HStack {
-                Text("Border")
-                    .foregroundStyle(.white)
+                Image(systemName: "slider.horizontal.3")
+                    .frame(width: 20)
+                Text("Border Mode")
+            }
+            .foregroundStyle(.white)
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+
+            Spacer()
+
+            Menu {
+                // TODO: handle proportional BorderMode
+                Picker("Mode", selection: .constant(BorderMode.fixed)) {//$selectedBorderMode) {
+                    ForEach(BorderMode.allCases) { mode in
+                        Label(
+                            title: { Text(mode.title) },
+                            icon: { mode.icon }
+                        )
+                        .tag(mode)
+                    }
+                }
+            } label: {
+                Text(selectedBorderMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                    )
+                    .tint(.orange)
+            }
+        }
+    }
+
+    private var borderSizeConfigItem: some View {
+        VStack(spacing: 8) {
+            HStack {
+                HStack {
+                    Image(systemName: "square.dashed")
+                        .frame(width: 20)
+                    Text("Border Size")
+                }
+                .foregroundStyle(.white)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
 
                 Spacer()
 
-                Text("\(Int(borderSize))")
+                Text("\(Int(selectedBorderSize))")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
@@ -188,7 +274,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
 
-                Slider(value: $borderSize, in: minBorder...maxBorder, step: 1)
+                Slider(value: $selectedBorderSize, in: minBorder...maxBorder, step: 1)
                     .tint(.white)
 
                 Text("\(Int(maxBorder))")
@@ -196,14 +282,30 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
         }
-        .padding(.horizontal)
     }
 
-    // MARK: Actions
+    // MARK: - Border Calculations
+
+    // TODO: handle changes of BorderMode
+    private func updateBorderSize(
+        selectedBorderSize: Double,
+        previewBoxingSize: CGSize,
+        image: UIImage
+    ) {
+        // Updates rendering border size
+        renderingBorderSize = selectedBorderSize
+
+        // Updates preview border size
+        let imageLargestSide = image.size.largestSide
+        let previewBorderRatio = selectedBorderSize / imageLargestSide
+        previewBorderSize = previewBorderRatio * previewBoxingSize.largestSide
+    }
+
+    // MARK: - Actions
 
     private func loadThumbnails(ofSize size: CGSize) async {
         var newEditingImages = [EditingImage]()
-        for image in imagesToEdit {
+        for image in _imagesToEdit {
             let thumbnail = await thumbnailLoader.loadThumbnail(ofSize: size, for: image)
             if let thumbnail {
                 newEditingImages.append(EditingImage(image: image, thumbnail: thumbnail))
@@ -226,7 +328,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func saveImages() {
         isProcessing = true
-        imageSaver.save(editingImages.map(\.image), borderSize: borderSize) {
+        imageSaver.save(editingImages.map(\.image), borderSize: renderingBorderSize) {
             isProcessing = false
             showExportFinishedAlert = true
         }

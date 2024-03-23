@@ -4,6 +4,19 @@ import UIKit
 /// Source: [Medium post](https://medium.com/the-traveled-ios-developers-guide/uigraphicsimagerenderer-fe40edc3a464).
 public class DefaultImageSaver: NSObject, ImageSaver {
 
+    private struct ImageRenderingInfos {
+        let size: CGSize
+        let borderWidth: CGFloat
+        let borderColor: UIColor
+
+        var innerImageAvailableSize: CGSize {
+            .init(
+                width: size.width - 2 * borderWidth,
+                height: size.height - 2 * borderWidth
+            )
+        }
+    }
+
     @Published public var numberOfSavedImages: Int = 0
 
     public func save(_ images: [UIImage], borderSize: CGFloat, completion: @escaping () -> Void) {
@@ -79,6 +92,8 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     }
 }
 
+// TODO: Move extensions in a Utils module
+
 extension UIImage {
     func scalePreservingAspectRatio(targetSize: CGSize) -> UIImage {
         // Determine the scale factor that preserves aspect ratio
@@ -104,19 +119,6 @@ extension UIImage {
                 size: scaledImageSize
             ))
         }
-    }
-}
-
-struct ImageRenderingInfos {
-    let size: CGSize
-    let borderWidth: CGFloat
-    let borderColor: UIColor
-
-    var innerImageAvailableSize: CGSize {
-        .init(
-            width: size.width - borderWidth,
-            height: size.height - borderWidth
-        )
     }
 }
 
