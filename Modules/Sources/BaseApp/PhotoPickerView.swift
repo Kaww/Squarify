@@ -25,7 +25,7 @@ public struct PhotoPickerView: View {
     }
 
     private var titleView: some View {
-        Text("Framer")
+        Text("Framr")
             .frame(maxWidth: .infinity, alignment: .leading)
             .font(.system(size: 40, weight: .black))
     }

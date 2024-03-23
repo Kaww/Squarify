@@ -1,17 +1,12 @@
-import Foundation
 import CoreGraphics
 import UIKit
 
 /// Source: [Medium post](https://medium.com/the-traveled-ios-developers-guide/uigraphicsimagerenderer-fe40edc3a464).
-class ImageSaver: NSObject, ObservableObject {
+public class DefaultImageSaver: NSObject, ImageSaver {
 
-    @Published var numberOfSavedImages: Int = 0
+    @Published public var numberOfSavedImages: Int = 0
 
-    func save(
-        _ images: [UIImage],
-        borderSize: CGFloat,
-        completion: @escaping () -> Void
-    ) {
+    public func save(_ images: [UIImage], borderSize: CGFloat, completion: @escaping () -> Void) {
         print(Date.now)
         Task {
             for image in images {
@@ -77,7 +72,7 @@ class ImageSaver: NSObject, ObservableObject {
     @objc
     private func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
         print("\(image) saved.")
-        
+
         Task { @MainActor in
             self.numberOfSavedImages += 1
         }
@@ -130,81 +125,3 @@ extension CGSize {
         width > height ? width : height
     }
 }
-
-//private func save(_ photo: UIImage, borderSize: CGFloat) {
-//    let renderingInfos = ImageRenderingInfos(
-//        size: CGSize(
-//            width: photo.size.largestSide,
-//            height: photo.size.largestSide
-//        ),
-//        borderWidth: borderSize,
-//        borderColor: .white
-//    )
-//    let scaledImage = photo.scalePreservingAspectRatio(targetSize: renderingInfos.innerImageAvailableSize)
-//    let imageSize = scaledImage.size
-//    let totalSize = renderingInfos.size
-//
-//    UIGraphicsBeginImageContext(totalSize)
-//
-//    let context = UIGraphicsGetCurrentContext()
-//    context?.setFillColor(UIColor.white.cgColor)
-//    context?.fill([.init(x: 0, y: 0, width: totalSize.width, height: totalSize.width)])
-//
-//    // Calculate image position
-//    let imageRect = CGRect(
-//        x: (totalSize.width - imageSize.width) / 2,
-//        y: (totalSize.height - imageSize.height) / 2,
-//        width: imageSize.width,
-//        height: imageSize.height
-//    )
-//    scaledImage.draw(in: imageRect)
-//
-//    guard let newImage = UIGraphicsGetImageFromCurrentImageContext() else {
-//        print("could not create new image")
-//        UIGraphicsEndImageContext()
-//        return
-//    }
-//
-//    UIGraphicsEndImageContext()
-//
-//    UIImageWriteToSavedPhotosAlbum(newImage, nil, nil, nil)
-//    print("\(photo) saved.")
-//}
-//
-//private func saveV2(_ photo: UIImage, borderSize: CGFloat) {
-//    let renderingInfos = ImageRenderingInfos(
-//        size: CGSize(
-//            width: photo.size.largestSide,
-//            height: photo.size.largestSide
-//        ),
-//        borderWidth: borderSize,
-//        borderColor: .white
-//    )
-//
-//    // TODO: extract that to only use 1 renderer in the process
-//    let scaledImage = photo.scalePreservingAspectRatio(targetSize: renderingInfos.innerImageAvailableSize)
-//    let imageSize = scaledImage.size
-//    let totalSize = renderingInfos.size
-//
-//    let format = UIGraphicsImageRendererFormat()
-//    format.scale = 1
-//
-//    let renderer = UIGraphicsImageRenderer(size: totalSize, format: format)
-//    let framedImage = renderer.image { context in
-//        UIColor.white.setFill()
-//        let frameRect = CGRect(x: 0, y: 0, width: totalSize.width, height: totalSize.width)
-//        context.fill(frameRect)
-//
-//        let imageRect = CGRect(
-//            x: (totalSize.width - imageSize.width) / 2,
-//            y: (totalSize.height - imageSize.height) / 2,
-//            width: imageSize.width,
-//            height: imageSize.height
-//        )
-//
-//        scaledImage.draw(in: imageRect)
-//    }
-//
-//    UIImageWriteToSavedPhotosAlbum(framedImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
-//    print("\(photo) saved.")
-//}

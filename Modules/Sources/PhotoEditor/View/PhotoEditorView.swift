@@ -9,27 +9,33 @@ struct EditingImage {
     }
 }
 
-public struct PhotoEditorView: View {
+public struct PhotoEditorView<Saver: ImageSaver>: View {
+    @StateObject private var imageSaver: Saver
+    private let thumbnailLoader: any ThumbnailLoader
+
+    private let imagesToEdit: [UIImage]
+    @State private var editingImages: [EditingImage] = []
+    private let onCancel: () -> Void
+
     @State private var isProcessing = false
     @State private var showExportFinishedAlert = false
+    @State private var isFinished = false
+
+    @State private var currentImageIndex = 0
 
     @State private var borderSize: Double = 0
     private let minBorder: Double = 0
     private let maxBorder: Double = 500
 
-    @State private var currentImageIndex = 0
-    private let imagesToEdit: [UIImage]
-    @State private var editingImages: [EditingImage] = []
-
-    private let onCancel: () -> Void
-
-    @StateObject private var imageSaver = ImageSaver()
-
     public init(
         imagesToEdit: [UIImage],
+        imageSaver: Saver,
+        thumbnailLoader: any ThumbnailLoader,
         onCancel: @escaping () -> Void
     ) {
         self.imagesToEdit = imagesToEdit
+        self._imageSaver = .init(wrappedValue: imageSaver)
+        self.thumbnailLoader = thumbnailLoader
         self.onCancel = onCancel
     }
 
@@ -39,50 +45,12 @@ public struct PhotoEditorView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
 
-            if editingImages.isEmpty {
-                GeometryReader { proxy in
-                    VStack {
-                        Text("Loading images...")
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(.orange)
-                            .controlSize(.large)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .task {
-                        var newEditingImages = [EditingImage]()
-                        for image in imagesToEdit {
-                            let thumbnail = await image.byPreparingThumbnail(ofSize: proxy.size)
-                            if let thumbnail {
-                                newEditingImages.append(EditingImage(image: image, thumbnail: thumbnail))
-                            }
-                        }
-                        self.editingImages = newEditingImages
-                    }
-                }
-                .transition(.opacity.combined(with: .scale).animation(.spring))
-            } else {
-                photoPreviewNavigationActions
-                    .padding(.horizontal)
-                    .transition(.opacity.combined(with: .scale).animation(.spring.delay(0)))
-
-                photoFrameView(image: editingImages[currentImageIndex].thumbnail)
-                    .padding(.bottom, 20)
-                    .transition(.opacity.combined(with: .scale).animation(.spring.delay(0.1)))
-
-                configView
-                    .transition(.opacity.combined(with: .scale).animation(.spring.delay(0.2)))
-
+            if isFinished {
                 Spacer()
-
-                ExportButton(
-                    isProcessing: isProcessing,
-                    numberOfImages: imagesToEdit.count,
-                    numberOfSavedImages: imageSaver.numberOfSavedImages,
-                    onTap: saveImages
-                )
-                .transition(.opacity.combined(with: .scale).animation(.spring.delay(0.3)))
-                .padding()
+            } else if editingImages.isEmpty {
+                thumbnailsLoadingView
+            } else {
+                loadedView
             }
         }
         .alert("Export finished", isPresented: $showExportFinishedAlert) {
@@ -91,6 +59,8 @@ public struct PhotoEditorView: View {
         }
         .preferredColorScheme(.dark)
     }
+
+    // MARK: Views
 
     private var headerView: some View {
         HStack() {
@@ -106,6 +76,54 @@ public struct PhotoEditorView: View {
             Text("Editor")
                 .font(.system(size: 18, weight: .medium))
         }
+    }
+
+    private var thumbnailsLoadingView: some View {
+        GeometryReader { proxy in
+            VStack {
+                Text("Loading images...")
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(.orange)
+                    .controlSize(.large)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .task {
+                await loadThumbnails(ofSize: proxy.size)
+            }
+        }
+        .transition(.opacity.combined(with: .scale).animation(.spring))
+    }
+
+
+    @ViewBuilder
+    private var loadedView: some View {
+        photoPreviewNavigationActions
+            .padding(.horizontal)
+            .transition(loadedViewSpringTransition(delay: 0))
+
+        photoFrameView(image: editingImages[currentImageIndex].thumbnail)
+            .padding(.bottom, 20)
+            .transition(loadedViewSpringTransition(delay: 0.1))
+
+        configView
+            .transition(loadedViewSpringTransition(delay: 0.2))
+
+        Spacer()
+
+        ExportButton(
+            isProcessing: isProcessing,
+            numberOfImages: imagesToEdit.count,
+            numberOfSavedImages: imageSaver.numberOfSavedImages,
+            onTap: saveImages
+        )
+        .transition(loadedViewSpringTransition(delay: 0.3))
+        .padding()
+    }
+
+    private func loadedViewSpringTransition(delay: TimeInterval) -> AnyTransition {
+        let spring = Animation.spring.delay(delay)
+        return .opacity.combined(with: .scale).animation(spring)
     }
 
     private var photoPreviewNavigationActions: some View {
@@ -181,6 +199,19 @@ public struct PhotoEditorView: View {
         .padding(.horizontal)
     }
 
+    // MARK: Actions
+
+    private func loadThumbnails(ofSize size: CGSize) async {
+        var newEditingImages = [EditingImage]()
+        for image in imagesToEdit {
+            let thumbnail = await thumbnailLoader.loadThumbnail(ofSize: size, for: image)
+            if let thumbnail {
+                newEditingImages.append(EditingImage(image: image, thumbnail: thumbnail))
+            }
+        }
+        self.editingImages = newEditingImages
+    }
+
     private func showPreviousPhoto() {
         if currentImageIndex > 0 {
             currentImageIndex -= 1
@@ -202,7 +233,11 @@ public struct PhotoEditorView: View {
     }
 
     private func finish() {
-        onCancel()
+        Task { @MainActor in
+            self.isFinished = true
+            try? await Task.sleep(for: .seconds(0.4))
+            onCancel()
+        }
     }
 
     private func openPhotoApp() {
@@ -220,6 +255,8 @@ public struct PhotoEditorView: View {
             UIImage(systemName: "camera.macro")!,
             UIImage(systemName: "pawprint.fill")!
         ],
+        imageSaver: MockImageSaver(),
+        thumbnailLoader: MockThumbnailLoader(),
         onCancel: {}
     )
 }

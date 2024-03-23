@@ -17,6 +17,8 @@ public struct AppView: View {
             .fullScreenCover(item: $photoSelection) { selection in
                 PhotoEditorView(
                     imagesToEdit: selection.photos,
+                    imageSaver: DefaultImageSaver(),
+                    thumbnailLoader: DefaultThumbnailLoader(),
                     onCancel: {
                         photoSelection = nil
                     }
