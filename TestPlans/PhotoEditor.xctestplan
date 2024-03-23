@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "3E96613A-7DA9-4F6F-A9B5-0CB4310DC30C",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "PhotoEditorTests",
+        "name" : "PhotoEditorTests"
+      }
+    }
+  ],
+  "version" : 1
+}

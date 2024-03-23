@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "2B0341AA-9930-40FF-BFFF-F34AAA93187C",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "BaseAppTests",
+        "name" : "BaseAppTests"
+      }
+    }
+  ],
+  "version" : 1
+}
