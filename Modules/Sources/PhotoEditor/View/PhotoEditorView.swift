@@ -24,6 +24,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var isProcessing = false
     @State private var showExportFinishedAlert = false
     @State private var isFinished = false
+    @State private var showBorderSizeInputAlertView = false
+    @State private var borderSizeAlertValue: Int? = nil
 
     // Toolbar
     @State private var currentImageIndex = 0
@@ -76,6 +78,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Button("Show photos in gallery", action: openPhotoApp)
         }
         .preferredColorScheme(.dark)
+        .ignoresSafeArea(.keyboard)
         .onChange(of: selectedBorderSize) { oldValue, newValue in
             updateBorderSize(
                 selectedBorderSize: newValue,
@@ -201,6 +204,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         .padding(previewBorderSize)
                         .onAppear { previewBoxingSize = proxy.size }
                         .onChange(of: proxy.size) { previewBoxingSize = $1 }
+                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: previewBorderSize)
                 }
         }
         .aspectRatio(contentMode: .fit)
@@ -264,9 +268,35 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
                 Spacer()
 
-                Text("\(Int(selectedBorderSize))")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
+                Button(action: { showBorderSizeInputAlertView = true }) {
+                    Text("\(Int(selectedBorderSize))")
+                        .font(.system(size: 16, weight: .medium, design: .monospaced))
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(.ultraThinMaterial)
+                        )
+                        .foregroundStyle(.orange)
+                }
+                .alert("Border Size", isPresented: $showBorderSizeInputAlertView) {
+                    TextField("Ex: 800", value: $borderSizeAlertValue, format: .number)
+                        .keyboardType(.numberPad)
+                        .foregroundStyle(.blue)
+
+                    Button("Apply") {
+                        if let borderSizeAlertValue {
+                            let newValue = Double(borderSizeAlertValue)
+                            selectedBorderSize = newValue >= Double(maxBorder) ? Double(maxBorder) : newValue
+                        }
+
+                        borderSizeAlertValue = nil
+                    }
+
+                    Button("Cancel", role: .cancel) {
+                        borderSizeAlertValue = nil
+                    }
+                }
             }
 
             HStack(spacing: 16) {
