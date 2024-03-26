@@ -1,10 +1,10 @@
 import SwiftUI
 
-enum BorderMode: String, CaseIterable, Identifiable  {
+public enum BorderMode: String, CaseIterable, Identifiable  {
     case fixed
     case proportional
 
-    var id: Self { self }
+    public var id: Self { self }
 
     var title: String {
         switch self {
@@ -23,6 +23,16 @@ enum BorderMode: String, CaseIterable, Identifiable  {
 
         case .proportional:
             return Image(systemName: "percent")
+        }
+    }
+
+    var unit: String {
+        switch self {
+        case .fixed:
+            return "px"
+
+        case .proportional:
+            return "%"
         }
     }
 }

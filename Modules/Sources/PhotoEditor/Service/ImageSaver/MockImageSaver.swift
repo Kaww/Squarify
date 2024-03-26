@@ -1,12 +1,11 @@
 import UIKit
 
 class MockImageSaver: ImageSaver {
-
     @Published var numberOfSavedImages: Int = 0
     
-    func save(_ images: [UIImage], borderSize: CGFloat, completion: @escaping () -> Void) {
+    func save(withParams params: ImageSaverParameters, completion: @escaping () -> Void) {
         Task {
-            for image in images {
+            for _ in params.images {
                 try? await Task.sleep(for: .seconds(0.2))
                 numberOfSavedImages += 1
             }

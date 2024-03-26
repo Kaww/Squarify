@@ -1,14 +1,5 @@
 import SwiftUI
 
-struct EditingImage {
-    let image: UIImage
-    let thumbnail: UIImage
-    
-    var sizeDescription: String {
-        "\(Int(image.size.width.rounded())) x \(Int(image.size.height.rounded()))"
-    }
-}
-
 public struct PhotoEditorView<Saver: ImageSaver>: View {
     
     // Services
@@ -31,13 +22,28 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex = 0
 
     // Edition
-    @State private var selectedBorderMode = BorderMode.fixed
-    @State private var selectedBorderSize: Double = 0
+    @State private var selectedBorderMode: BorderMode = .fixed
+    // TODO: rename borderSize by borderValue
+    @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
-    @State private var renderingBorderSize: Double = 0
     @State private var previewBoxingSize: CGSize = .zero
-    private let minBorder: Double = 0
-    private let maxBorder: Double
+
+    private let minBorderValue: Double = 0
+    private var maxBorderValue: Double {
+        switch selectedBorderMode {
+        case .fixed:
+            let largestSize: Int = _imagesToEdit.reduce(into: 100, { partialResult, image in
+                let imageLargestSide = Int(image.size.largestSide)
+                if partialResult < imageLargestSide {
+                    partialResult = imageLargestSide
+                }
+            })
+            return Double(Int(largestSize / 4))
+
+        case .proportional:
+            return 25
+        }
+    }
 
     public init(
         imagesToEdit: [UIImage],
@@ -49,14 +55,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         self._imageSaver = .init(wrappedValue: imageSaver)
         self.thumbnailLoader = thumbnailLoader
         self.onCancel = onCancel
-
-        let largestSize: Int = imagesToEdit.reduce(into: 100, { partialResult, image in
-            let imageLargestSide = Int(image.size.largestSide)
-            if partialResult < imageLargestSide {
-                partialResult = imageLargestSide
-            }
-        })
-        self.maxBorder = Double(Int(largestSize / 4))
     }
 
     public var body: some View {
@@ -79,21 +77,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
         .preferredColorScheme(.dark)
         .ignoresSafeArea(.keyboard)
-        .onChange(of: selectedBorderSize) { oldValue, newValue in
-            updateBorderSize(
-                selectedBorderSize: newValue,
-                previewBoxingSize: previewBoxingSize,
-                image: editingImages[currentImageIndex].image
-            )
-        }
         .onChange(of: currentImageIndex) { oldValue, newValue in
-            updateBorderSize(
-                selectedBorderSize: selectedBorderSize,
-                previewBoxingSize: previewBoxingSize,
-                image: editingImages[newValue].image
-            )
+            currentImageDidChanged(newImage: editingImages[newValue].image)
         }
+        .onChange(of: selectedBorderValue) { oldValue, newValue in
+            borderValueDidChanged(newValue: newValue)
 
+        }
+        .onChange(of: selectedBorderMode) { oldValue, newValue in
+            borderModeDidChanged()
+        }
     }
 
     // MARK: - Views
@@ -231,8 +224,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Spacer()
 
             Menu {
-                // TODO: handle proportional BorderMode
-                Picker("Mode", selection: .constant(BorderMode.fixed)) {//$selectedBorderMode) {
+                Picker("Mode", selection: $selectedBorderMode) {
                     ForEach(BorderMode.allCases) { mode in
                         Label(
                             title: { Text(mode.title) },
@@ -269,7 +261,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Spacer()
 
                 Button(action: { showBorderSizeInputAlertView = true }) {
-                    Text("\(Int(selectedBorderSize))")
+                    Text("\(Int(selectedBorderValue)) \(selectedBorderMode.unit)")
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
                         .padding(.vertical, 5)
                         .padding(.horizontal, 8)
@@ -280,14 +272,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         .foregroundStyle(.orange)
                 }
                 .alert("Border Size", isPresented: $showBorderSizeInputAlertView) {
-                    TextField("Ex: 800", value: $borderSizeAlertValue, format: .number)
+                    TextField("Ex: 200", value: $borderSizeAlertValue, format: .number)
                         .keyboardType(.numberPad)
                         .foregroundStyle(.blue)
 
                     Button("Apply") {
                         if let borderSizeAlertValue {
                             let newValue = Double(borderSizeAlertValue)
-                            selectedBorderSize = newValue >= Double(maxBorder) ? Double(maxBorder) : newValue
+                            selectedBorderValue = newValue >= Double(maxBorderValue) ? Double(maxBorderValue) : newValue
                         }
 
                         borderSizeAlertValue = nil
@@ -300,14 +292,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             }
 
             HStack(spacing: 16) {
-                Text("\(Int(minBorder))")
+                Text("\(Int(minBorderValue))")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
 
-                Slider(value: $selectedBorderSize, in: minBorder...maxBorder, step: 1)
+                Slider(value: $selectedBorderValue, in: minBorderValue...maxBorderValue, step: 1)
                     .tint(.white)
 
-                Text("\(Int(maxBorder))")
+                Text("\(Int(maxBorderValue))")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
@@ -316,19 +308,45 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     // MARK: - Border Calculations
 
-    // TODO: handle changes of BorderMode
     private func updateBorderSize(
-        selectedBorderSize: Double,
-        previewBoxingSize: CGSize,
+        selectedBorderValue: Double,
         image: UIImage
     ) {
-        // Updates rendering border size
-        renderingBorderSize = selectedBorderSize
-
-        // Updates preview border size
         let imageLargestSide = image.size.largestSide
-        let previewBorderRatio = selectedBorderSize / imageLargestSide
+        let borderValue: Double
+
+        switch selectedBorderMode {
+        case .fixed:
+            borderValue = selectedBorderValue
+
+        case .proportional:
+            borderValue = selectedBorderValue / 100 * imageLargestSide
+        }
+
+        let previewBorderRatio = borderValue / imageLargestSide
         previewBorderSize = previewBorderRatio * previewBoxingSize.largestSide
+    }
+
+    private func currentImageDidChanged(newImage: UIImage) {
+        updateBorderSize(
+            selectedBorderValue: selectedBorderValue,
+            image: newImage
+        )
+    }
+
+    private func borderValueDidChanged(newValue: Double) {
+        updateBorderSize(
+            selectedBorderValue: newValue,
+            image: editingImages[currentImageIndex].image
+        )
+    }
+
+    private func borderModeDidChanged() {
+        selectedBorderValue = minBorderValue
+        updateBorderSize(
+            selectedBorderValue: selectedBorderValue,
+            image: editingImages[currentImageIndex].image
+        )
     }
 
     // MARK: - Actions
@@ -358,10 +376,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func saveImages() {
         isProcessing = true
-        imageSaver.save(editingImages.map(\.image), borderSize: renderingBorderSize) {
+        
+        let params = ImageSaverParameters(
+            images: editingImages.map(\.image),
+            borderValue: selectedBorderValue,
+            borderMode: selectedBorderMode
+        )
+        imageSaver.save(withParams: params, completion: {
             isProcessing = false
             showExportFinishedAlert = true
-        }
+        })
     }
 
     private func finish() {
