@@ -23,7 +23,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     // Edition
     @State private var selectedBorderMode: BorderMode = .fixed
-    // TODO: rename borderSize by borderValue
     @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
     @State private var previewBoxingSize: CGSize = .zero

@@ -104,8 +104,6 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     }
 }
 
-// TODO: Move extensions in a Utils module
-
 extension UIImage {
     func scalePreservingAspectRatio(targetSize: CGSize) -> UIImage {
         // Determine the scale factor that preserves aspect ratio

@@ -1,22 +1,11 @@
 import SwiftUI
 import PhotosUI
+import Utils
 
+// TODO: Move to style
 public extension Color {
     static let aquamarine = Color(uiColor: UIColor(red: 2/255, green: 255/255, blue: 176/255, alpha: 1))
     static let risdBlue = Color(uiColor: UIColor(red: 2/255, green: 77/255, blue: 255/255, alpha: 1))
-}
-
-// TODO: Move to utils
-struct IsPressedButtonStyle: ButtonStyle {
-
-    @Binding var isPressed: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .onChange(of: configuration.isPressed) { oldValue, newValue in
-                isPressed = newValue
-            }
-    }
 }
 
 public struct PhotoPickerView: View {
@@ -28,6 +17,10 @@ public struct PhotoPickerView: View {
     @State private var hasAppeared = false
 
     @Binding var selection: PhotoSelection?
+
+    public init(selection: Binding<PhotoSelection?>) {
+        _selection = selection
+    }
 
     public var body: some View {
         VStack {

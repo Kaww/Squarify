@@ -20,7 +20,9 @@
 		49160A7C2B5EDE1900943FA1 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		492D88552B61A10A001F6B1D /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
 		492D885A2B61A1CD001F6B1D /* PhotoEditor.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoEditor.xctestplan; sourceTree = "<group>"; };
+		4960A02E2BB34E5900D520FE /* PhotoPicker.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoPicker.xctestplan; sourceTree = "<group>"; };
 		4967AB242B61B35100850A98 /* BaseApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseApp.xctestplan; sourceTree = "<group>"; };
+		49C578462BB3516E00E9137A /* Utils.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Utils.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,8 @@
 			children = (
 				4967AB242B61B35100850A98 /* BaseApp.xctestplan */,
 				492D885A2B61A1CD001F6B1D /* PhotoEditor.xctestplan */,
+				4960A02E2BB34E5900D520FE /* PhotoPicker.xctestplan */,
+				49C578462BB3516E00E9137A /* Utils.xctestplan */,
 			);
 			path = TestPlans;
 			sourceTree = "<group>";

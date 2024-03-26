@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "68291E66-C4D9-49D2-BB55-CF612F28CEC3",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "PhotoPickerTests",
+        "name" : "PhotoPickerTests"
+      }
+    }
+  ],
+  "version" : 1
+}

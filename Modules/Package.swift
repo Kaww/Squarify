@@ -10,7 +10,9 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "BaseApp", targets: ["BaseApp"]),
-        .library(name: "PhotoEditor", targets: ["PhotoEditor"])
+        .library(name: "PhotoEditor", targets: ["PhotoEditor"]),
+        .library(name: "PhotoPicker", targets: ["PhotoPicker"]),
+        .library(name: "Utils", targets: ["Utils"])
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -18,7 +20,8 @@ let package = Package(
         .target(
             name: "BaseApp",
             dependencies: [
-                "PhotoEditor"
+                "PhotoEditor",
+                "PhotoPicker"
             ]
         ),
         .testTarget(
@@ -34,6 +37,27 @@ let package = Package(
             name: "PhotoEditorTests",
             dependencies: [
                 "PhotoEditor"
+            ]
+        ),
+        .target(
+            name: "PhotoPicker",
+            dependencies: [
+                "Utils"
+            ]
+        ),
+        .testTarget(
+            name: "PhotoPickerTests",
+            dependencies: [
+                "PhotoPicker"
+            ]
+        ),
+        .target(
+            name: "Utils"
+        ),
+        .testTarget(
+            name: "UtilsTests",
+            dependencies: [
+                "Utils"
             ]
         )
     ]

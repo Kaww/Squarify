@@ -1,10 +1,6 @@
 import SwiftUI
 import PhotoEditor
-
-struct PhotoSelection: Identifiable {
-    let photos: [UIImage]
-    let id: String
-}
+import PhotoPicker
 
 public struct AppView: View {
 
