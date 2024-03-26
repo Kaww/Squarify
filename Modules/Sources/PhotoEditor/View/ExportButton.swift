@@ -1,4 +1,5 @@
 import SwiftUI
+import Design
 
 struct ExportButton: View {
 
@@ -22,7 +23,7 @@ struct ExportButton: View {
     var body: some View {
         Button(action: onTap) {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .foregroundStyle(.orange)
+                .foregroundStyle(.sunglow)
                 .frame(height: 40)
                 .overlay {
                     if isProcessing {

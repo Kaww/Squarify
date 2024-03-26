@@ -23,6 +23,7 @@
 		4960A02E2BB34E5900D520FE /* PhotoPicker.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoPicker.xctestplan; sourceTree = "<group>"; };
 		4967AB242B61B35100850A98 /* BaseApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseApp.xctestplan; sourceTree = "<group>"; };
 		49C578462BB3516E00E9137A /* Utils.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Utils.xctestplan; sourceTree = "<group>"; };
+		49C578482BB3576200E9137A /* Design.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Design.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +82,7 @@
 				492D885A2B61A1CD001F6B1D /* PhotoEditor.xctestplan */,
 				4960A02E2BB34E5900D520FE /* PhotoPicker.xctestplan */,
 				49C578462BB3516E00E9137A /* Utils.xctestplan */,
+				49C578482BB3576200E9137A /* Design.xctestplan */,
 			);
 			path = TestPlans;
 			sourceTree = "<group>";

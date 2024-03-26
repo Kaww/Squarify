@@ -1,12 +1,7 @@
 import SwiftUI
 import PhotosUI
 import Utils
-
-// TODO: Move to style
-public extension Color {
-    static let aquamarine = Color(uiColor: UIColor(red: 2/255, green: 255/255, blue: 176/255, alpha: 1))
-    static let risdBlue = Color(uiColor: UIColor(red: 2/255, green: 77/255, blue: 255/255, alpha: 1))
-}
+import Design
 
 public struct PhotoPickerView: View {
 
@@ -34,6 +29,9 @@ public struct PhotoPickerView: View {
         .task {
             try? await Task.sleep(for: .seconds(0.2))
             hasAppeared = true
+        }
+        .background {
+            BackgroundBlurView()
         }
     }
 
@@ -73,7 +71,11 @@ public struct PhotoPickerView: View {
 
     private var photosPickerLabel: some View {
         Circle()
-            .fill(Color.risdBlue)
+            .fill(LinearGradient(
+                colors: [.risdBlueLighter, .risdBlue],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ))
             .brightness(isPressingButton ? -0.1 : 0)
             .shadow(color: .risdBlue.opacity(0.3), radius: 20, x: 0.0, y: 10)
             .frame(width: 90, height: 90)

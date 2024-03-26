@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "BAF28FB2-3D63-4FE5-905E-8C33C67733B4",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DesignTests",
+        "name" : "DesignTests"
+      }
+    }
+  ],
+  "version" : 1
+}

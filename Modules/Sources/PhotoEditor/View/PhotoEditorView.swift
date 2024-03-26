@@ -1,4 +1,5 @@
 import SwiftUI
+import Design
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
     
@@ -112,7 +113,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Text("Loading images...")
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .tint(.orange)
+                    .tint(.sunglow)
                     .controlSize(.large)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -241,7 +242,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(.ultraThinMaterial)
                     )
-                    .tint(.orange)
+                    .tint(.sunglow)
             }
         }
     }
@@ -268,7 +269,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                             RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 .fill(.ultraThinMaterial)
                         )
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.sunglow)
                 }
                 .alert("Border Size", isPresented: $showBorderSizeInputAlertView) {
                     TextField("Ex: 200", value: $borderSizeAlertValue, format: .number)
@@ -296,7 +297,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
 
                 Slider(value: $selectedBorderValue, in: minBorderValue...maxBorderValue, step: 1)
-                    .tint(.white)
+                    .tint(.sunglow)
 
                 Text("\(Int(maxBorderValue))")
                     .foregroundStyle(.white)
