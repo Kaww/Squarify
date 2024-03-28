@@ -58,10 +58,11 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     public var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             headerView
                 .padding(.horizontal)
-                .padding(.vertical)
+                .padding(.top)
+                .padding(.bottom, 8)
 
             if isFinished {
                 Spacer()
@@ -93,10 +94,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private var headerView: some View {
         HStack() {
-            Button(action: onCancel) {
-                Image(systemName: "multiply")
-                    .font(.system(size: 30, weight: .medium))
-                    .foregroundStyle(.white)
+            Button(action: finish) {
+                Text("Cancel")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.sunglow)
             }
 
             Spacer()
@@ -127,13 +128,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     @ViewBuilder
     private var loadedView: some View {
-        photoPreviewNavigationActions
-            .padding(.horizontal)
-            .transition(loadedViewSpringTransition(delay: 0))
-
         photoFrameView(image: editingImages[currentImageIndex].thumbnail)
-            .padding(.bottom, 20)
             .transition(loadedViewSpringTransition(delay: 0.1))
+            .padding(.bottom, 8)
+
+        photoPreviewNavigationActions
+            .padding(.horizontal, 4)
+            .padding(.bottom, 16)
+            .transition(loadedViewSpringTransition(delay: 0))
 
         configView
             .transition(loadedViewSpringTransition(delay: 0.2))
@@ -166,13 +168,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
+                    .padding(.leading, 4)
             }
             .buttonStyle(.plain)
             .disabled(currentImageIndex <= 0)
 
             Text("Photo \(currentImageIndex + 1)/\(editingImages.count) • \(editingImages[currentImageIndex].sizeDescription)")
                 .monospacedDigit()
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: 12, weight: .medium))
                 .layoutPriority(1)
 
             Button(action: showNextPhoto) {
@@ -181,10 +184,17 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .contentShape(Rectangle())
+                    .padding(.trailing, 4)
             }
             .buttonStyle(.plain)
             .disabled(currentImageIndex == editingImages.count - 1)
         }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
+        .background(
+            Capsule(style: .circular)
+                .fill(.ultraThinMaterial)
+        )
     }
 
     private func photoFrameView(image: UIImage) -> some View {
@@ -197,14 +207,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         .padding(previewBorderSize)
                         .onAppear { previewBoxingSize = proxy.size }
                         .onChange(of: proxy.size) { previewBoxingSize = $1 }
-                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: previewBorderSize)
                 }
         }
         .aspectRatio(contentMode: .fit)
     }
 
     private var configView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 8) {
             borderModeConfigItem
             borderSizeConfigItem
         }
@@ -214,7 +223,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private var borderModeConfigItem: some View {
         HStack {
             HStack {
-                Image(systemName: "slider.horizontal.3")
+                Image(systemName: "square.dashed")
                     .frame(width: 20)
                 Text("Border Mode")
             }
@@ -251,7 +260,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         VStack(spacing: 8) {
             HStack {
                 HStack {
-                    Image(systemName: "square.dashed")
+                    Image(systemName: "slider.horizontal.3")
                         .frame(width: 20)
                     Text("Border Size")
                 }
@@ -310,7 +319,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func updateBorderSize(
         selectedBorderValue: Double,
-        image: UIImage
+        image: UIImage,
+        animate: Bool = true
     ) {
         let imageLargestSide = image.size.largestSide
         let borderValue: Double
@@ -324,13 +334,18 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
 
         let previewBorderRatio = borderValue / imageLargestSide
-        previewBorderSize = previewBorderRatio * previewBoxingSize.largestSide
+
+        let animation = animate ? Animation.spring(response: 0.4, dampingFraction: 0.6) : nil
+        withAnimation(animation) {
+            previewBorderSize = previewBorderRatio * previewBoxingSize.largestSide
+        }
     }
 
     private func currentImageDidChanged(newImage: UIImage) {
         updateBorderSize(
             selectedBorderValue: selectedBorderValue,
-            image: newImage
+            image: newImage,
+            animate: false
         )
     }
 
@@ -389,17 +404,25 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     private func finish() {
-        Task { @MainActor in
-            self.isFinished = true
-            try? await Task.sleep(for: .seconds(0.4))
+        closeAnimation {
             onCancel()
         }
     }
 
     private func openPhotoApp() {
-        onCancel()
-        if let photoAppURL = URL(string:"photos-redirect://") {
-            UIApplication.shared.open(photoAppURL)
+        closeAnimation {
+            onCancel()
+            if let photoAppURL = URL(string:"photos-redirect://") {
+                UIApplication.shared.open(photoAppURL)
+            }
+        }
+    }
+
+    private func closeAnimation(completion: @escaping () -> Void) {
+        Task { @MainActor in
+            self.isFinished = true
+            try? await Task.sleep(for: .seconds(0.4))
+            completion()
         }
     }
 }
