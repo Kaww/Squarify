@@ -72,9 +72,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 loadedView
             }
         }
-        .alert("Export finished", isPresented: $showExportFinishedAlert) {
+        .alert("Export finished 🎉", isPresented: $showExportFinishedAlert) {
             Button("Back home", role: .cancel, action: finish)
-            Button("Show photos in gallery", action: openPhotoApp)
+            Button("Open Photos gallery", action: openPhotoApp)
         }
         .preferredColorScheme(.dark)
         .ignoresSafeArea(.keyboard)
@@ -129,13 +129,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @ViewBuilder
     private var loadedView: some View {
         photoFrameView(image: editingImages[currentImageIndex].thumbnail)
-            .transition(loadedViewSpringTransition(delay: 0.1))
+            .transition(loadedViewSpringTransition(delay: 0))
             .padding(.bottom, 8)
 
         photoPreviewNavigationActions
             .padding(.horizontal, 4)
             .padding(.bottom, 16)
-            .transition(loadedViewSpringTransition(delay: 0))
+            .transition(loadedViewSpringTransition(delay: 0.1))
 
         configView
             .transition(loadedViewSpringTransition(delay: 0.2))
@@ -149,7 +149,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             onTap: saveImages
         )
         .transition(loadedViewSpringTransition(delay: 0.3))
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+
+        Text("Photos will be saved in your Photos gallery")
+            .font(.system(size: 12, weight: .regular))
+            .opacity(0.5)
+            .transition(loadedViewSpringTransition(delay: 0.4))
     }
 
     private func loadedViewSpringTransition(delay: TimeInterval) -> AnyTransition {
@@ -173,7 +179,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .buttonStyle(.plain)
             .disabled(currentImageIndex <= 0)
 
-            Text("Photo \(currentImageIndex + 1)/\(editingImages.count) • \(editingImages[currentImageIndex].sizeDescription)")
+            Text("Image \(currentImageIndex + 1)/\(editingImages.count) • \(editingImages[currentImageIndex].sizeDescription)")
                 .monospacedDigit()
                 .font(.system(size: 12, weight: .medium))
                 .layoutPriority(1)

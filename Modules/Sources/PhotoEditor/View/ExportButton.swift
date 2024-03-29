@@ -53,7 +53,7 @@ struct ExportButton: View {
     }
 
     private var exportButtonLabel: some View {
-        Label("Export all", systemImage: "square.and.arrow.up")
+        Label("Export all photos", systemImage: "square.and.arrow.up")
             .labelStyle(.titleAndIcon)
             .font(.system(size: 16, weight: .bold, design: .rounded))
             .foregroundStyle(.black)

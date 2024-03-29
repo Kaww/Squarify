@@ -33,12 +33,15 @@ public struct PhotoPickerView: View {
         .background {
             BackgroundBlurView()
         }
+        .preferredColorScheme(.light)
     }
 
     private var titleView: some View {
         Text("Framr")
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundStyle(.ultraThickMaterial)
             .font(.system(size: 40, weight: .black))
+            .shadow(color: .black.opacity(0.3), radius: 20)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var photosPickerButton: some View {
@@ -60,7 +63,9 @@ public struct PhotoPickerView: View {
             .disabled(isLoading)
 
             Text("Pick photos")
-                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(.ultraThickMaterial)
+                .font(.system(size: 20, weight: .semibold))
+                .shadow(color: .black.opacity(0.3), radius: 20)
                 .opacity(isLoading ? 0 : 1)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
@@ -76,6 +81,16 @@ public struct PhotoPickerView: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             ))
+            .overlay {
+                Circle()
+                    .stroke(style: StrokeStyle(lineWidth: 20))
+                    .fill(.risdBlue)
+                    .brightness(-0.05)
+//                    .padding()
+                    .blur(radius: 8.0)
+                    .offset(x: isPressingButton ? 5 : -5, y: isPressingButton ? 5 : -5)
+                    .clipShape(Circle())
+            }
             .brightness(isPressingButton ? -0.1 : 0)
             .shadow(color: .risdBlue.opacity(0.3), radius: 20, x: 0.0, y: 10)
             .frame(width: 90, height: 90)

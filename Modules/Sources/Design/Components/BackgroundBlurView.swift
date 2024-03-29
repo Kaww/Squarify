@@ -11,19 +11,20 @@ public struct BackgroundBlurView: View {
     @State private var balls: [Ball] = []
     @State private var frameSize: CGSize = .zero
 
-    private let timer = Timer.publish(every: 1, on: .main, in: .common)
+    private let timer = Timer.publish(every: 0.5, on: .main, in: .common)
         .autoconnect()
         .receive(on: RunLoop.main)
 
-    private let ballCount = 20
-    private let ballSize = 200
-    private let ballColors: [Color] = [.aquamarine, .sunglow]
+    private let ballCount = 10
+    private let ballSize = 300
+    private let ballColors: [Color] = [.risdBlue, .aquamarine, .sunglow]
+    private let backgroundColor = Color.aquamarine
 
     public init() {}
 
     public var body: some View {
         GeometryReader { proxy in
-            Color.clear
+            backgroundColor
                 .overlay {
                     ForEach(balls) { ball in
                         Circle()
@@ -33,7 +34,7 @@ public struct BackgroundBlurView: View {
                     }
                 }
                 .onReceive(timer) { _ in
-                    withAnimation(.easeInOut(duration: 8)) {
+                    withAnimation(.easeInOut(duration: 5)) {
 
                         for i in 0..<ballCount {
                             balls[i].position = randomPosition(in: frameSize, ballSize: .init(width: ballSize, height: ballSize))
@@ -47,7 +48,7 @@ public struct BackgroundBlurView: View {
                         balls.append(.init(
                             id: UUID(),
                             position: randomPosition(in: frameSize, ballSize: .init(width: ballSize, height: ballSize)),
-                            color: colors.randomElement() ?? .risdBlue)
+                            color: ballColors.randomElement() ?? .risdBlue)
                         )
                     }
                 }
@@ -58,9 +59,8 @@ public struct BackgroundBlurView: View {
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea(.container)
         }
+        .preferredColorScheme(.light)
     }
-
-    private let colors = [Color.risdBlue, Color.sunglow, .white, .aquamarine]
 
     private func randomPosition(in bounds: CGSize, ballSize: CGSize) -> CGPoint {
         let xRange = -(bounds.width/2)...bounds.width*1.5
