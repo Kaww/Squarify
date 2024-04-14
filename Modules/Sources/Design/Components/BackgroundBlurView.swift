@@ -15,16 +15,18 @@ public struct BackgroundBlurView: View {
         .autoconnect()
         .receive(on: RunLoop.main)
 
-    private let ballCount = 10
+    private let ballCount = 4
     private let ballSize = 300
-    private let ballColors: [Color] = [.risdBlue, .aquamarine, .sunglow]
-    private let backgroundColor = Color.aquamarine
+    private let ballColors: [Color] = [.aquamarine]
+    private let backgroundColor = Color.risdBlue
 
     public init() {}
 
     public var body: some View {
         GeometryReader { proxy in
             backgroundColor
+                .scaleEffect(2)
+                .ignoresSafeArea(edges: .vertical)
                 .overlay {
                     ForEach(balls) { ball in
                         Circle()

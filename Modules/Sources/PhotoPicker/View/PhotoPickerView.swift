@@ -37,7 +37,7 @@ public struct PhotoPickerView: View {
     }
 
     private var titleView: some View {
-        Text("Framr")
+        Text("Squarify")
             .foregroundStyle(.ultraThickMaterial)
             .font(.system(size: 40, weight: .black))
             .shadow(color: .black.opacity(0.3), radius: 20)
@@ -86,7 +86,6 @@ public struct PhotoPickerView: View {
                     .stroke(style: StrokeStyle(lineWidth: 20))
                     .fill(.risdBlue)
                     .brightness(-0.05)
-//                    .padding()
                     .blur(radius: 8.0)
                     .offset(x: isPressingButton ? 5 : -5, y: isPressingButton ? 5 : -5)
                     .clipShape(Circle())
