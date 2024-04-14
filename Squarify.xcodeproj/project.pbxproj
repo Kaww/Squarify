@@ -115,7 +115,7 @@
 			packageProductDependencies = (
 				493D9DAF2B61B3EC00245A1E /* BaseApp */,
 			);
-			productName = Framr;
+			productName = Squarify;
 			productReference = 49160A722B5EDE1800943FA1 /* Squarify.app */;
 			productType = "com.apple.product-type.application";
 		};
