@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "49160A712B5EDE1800943FA1"
-               BuildableName = "Framr.app"
-               BlueprintName = "Framr"
-               ReferencedContainer = "container:Framr.xcodeproj">
+               BuildableName = "Squarify.app"
+               BlueprintName = "Squarify"
+               ReferencedContainer = "container:Squarify.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,9 +44,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "49160A712B5EDE1800943FA1"
-            BuildableName = "Framr.app"
-            BlueprintName = "Framr"
-            ReferencedContainer = "container:Framr.xcodeproj">
+            BuildableName = "Squarify.app"
+            BlueprintName = "Squarify"
+            ReferencedContainer = "container:Squarify.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "49160A712B5EDE1800943FA1"
-            BuildableName = "Framr.app"
-            BlueprintName = "Framr"
-            ReferencedContainer = "container:Framr.xcodeproj">
+            BuildableName = "Squarify.app"
+            BlueprintName = "Squarify"
+            ReferencedContainer = "container:Squarify.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

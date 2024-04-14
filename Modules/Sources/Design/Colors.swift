@@ -1,6 +1,6 @@
 import SwiftUI
 
-public enum FramrColor: String, CaseIterable {
+public enum SquarifyColor: String, CaseIterable {
     case aquamarine
     case risdBlue
     case risdBlueLighter
@@ -8,14 +8,14 @@ public enum FramrColor: String, CaseIterable {
 }
 
 extension Color {
-    public init(_ color: FramrColor) {
+    public init(_ color: SquarifyColor) {
         self.init(color.rawValue, bundle: .module)
     }
 
-    public static var aquamarine: Color { Color(FramrColor.aquamarine) }
-    public static var risdBlue: Color { Color(FramrColor.risdBlue) }
-    public static var risdBlueLighter: Color { Color(FramrColor.risdBlueLighter) }
-    public static var sunglow: Color { Color(FramrColor.sunglow) }
+    public static var aquamarine: Color { Color(SquarifyColor.aquamarine) }
+    public static var risdBlue: Color { Color(SquarifyColor.risdBlue) }
+    public static var risdBlueLighter: Color { Color(SquarifyColor.risdBlueLighter) }
+    public static var sunglow: Color { Color(SquarifyColor.sunglow) }
 }
 
 extension ShapeStyle where Self == Color {

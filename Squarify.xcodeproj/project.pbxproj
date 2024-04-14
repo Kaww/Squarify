@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		49160A762B5EDE1800943FA1 /* FramrApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49160A752B5EDE1800943FA1 /* FramrApp.swift */; };
+		49160A762B5EDE1800943FA1 /* SquarifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49160A752B5EDE1800943FA1 /* SquarifyApp.swift */; };
 		49160A7A2B5EDE1900943FA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49160A792B5EDE1900943FA1 /* Assets.xcassets */; };
 		49160A7D2B5EDE1900943FA1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49160A7C2B5EDE1900943FA1 /* Preview Assets.xcassets */; };
 		493D9DB02B61B3EC00245A1E /* BaseApp in Frameworks */ = {isa = PBXBuildFile; productRef = 493D9DAF2B61B3EC00245A1E /* BaseApp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		49160A722B5EDE1800943FA1 /* Framr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Framr.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		49160A752B5EDE1800943FA1 /* FramrApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FramrApp.swift; sourceTree = "<group>"; };
+		49160A722B5EDE1800943FA1 /* Squarify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Squarify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		49160A752B5EDE1800943FA1 /* SquarifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquarifyApp.swift; sourceTree = "<group>"; };
 		49160A792B5EDE1900943FA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		49160A7C2B5EDE1900943FA1 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		492D88552B61A10A001F6B1D /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
@@ -24,6 +24,7 @@
 		4967AB242B61B35100850A98 /* BaseApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseApp.xctestplan; sourceTree = "<group>"; };
 		49C578462BB3516E00E9137A /* Utils.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Utils.xctestplan; sourceTree = "<group>"; };
 		49C578482BB3576200E9137A /* Design.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Design.xctestplan; sourceTree = "<group>"; };
+		49E067C72BCC60F800F4D111 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,9 +42,10 @@
 		49160A692B5EDE1800943FA1 = {
 			isa = PBXGroup;
 			children = (
+				49E067C72BCC60F800F4D111 /* README.md */,
 				492D88592B61A1A7001F6B1D /* TestPlans */,
 				492D88552B61A10A001F6B1D /* Modules */,
-				49160A742B5EDE1800943FA1 /* Framr */,
+				49160A742B5EDE1800943FA1 /* Squarify */,
 				49160A732B5EDE1800943FA1 /* Products */,
 				493D9DAE2B61B3EC00245A1E /* Frameworks */,
 			);
@@ -52,19 +54,19 @@
 		49160A732B5EDE1800943FA1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				49160A722B5EDE1800943FA1 /* Framr.app */,
+				49160A722B5EDE1800943FA1 /* Squarify.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		49160A742B5EDE1800943FA1 /* Framr */ = {
+		49160A742B5EDE1800943FA1 /* Squarify */ = {
 			isa = PBXGroup;
 			children = (
-				49160A752B5EDE1800943FA1 /* FramrApp.swift */,
+				49160A752B5EDE1800943FA1 /* SquarifyApp.swift */,
 				49160A792B5EDE1900943FA1 /* Assets.xcassets */,
 				49160A7B2B5EDE1900943FA1 /* Preview Content */,
 			);
-			path = Framr;
+			path = Squarify;
 			sourceTree = "<group>";
 		};
 		49160A7B2B5EDE1900943FA1 /* Preview Content */ = {
@@ -97,9 +99,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		49160A712B5EDE1800943FA1 /* Framr */ = {
+		49160A712B5EDE1800943FA1 /* Squarify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49160A802B5EDE1900943FA1 /* Build configuration list for PBXNativeTarget "Framr" */;
+			buildConfigurationList = 49160A802B5EDE1900943FA1 /* Build configuration list for PBXNativeTarget "Squarify" */;
 			buildPhases = (
 				49160A6E2B5EDE1800943FA1 /* Sources */,
 				49160A6F2B5EDE1800943FA1 /* Frameworks */,
@@ -109,12 +111,12 @@
 			);
 			dependencies = (
 			);
-			name = Framr;
+			name = Squarify;
 			packageProductDependencies = (
 				493D9DAF2B61B3EC00245A1E /* BaseApp */,
 			);
 			productName = Framr;
-			productReference = 49160A722B5EDE1800943FA1 /* Framr.app */;
+			productReference = 49160A722B5EDE1800943FA1 /* Squarify.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -132,7 +134,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 49160A6D2B5EDE1800943FA1 /* Build configuration list for PBXProject "Framr" */;
+			buildConfigurationList = 49160A6D2B5EDE1800943FA1 /* Build configuration list for PBXProject "Squarify" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -145,7 +147,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				49160A712B5EDE1800943FA1 /* Framr */,
+				49160A712B5EDE1800943FA1 /* Squarify */,
 			);
 		};
 /* End PBXProject section */
@@ -167,7 +169,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49160A762B5EDE1800943FA1 /* FramrApp.swift in Sources */,
+				49160A762B5EDE1800943FA1 /* SquarifyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,7 +302,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Framr/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Squarify/Preview Content\"";
 				DEVELOPMENT_TEAM = 89EXPD2XDP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -317,7 +319,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kaww.Framr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaww.squarify;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -332,7 +334,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Framr/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Squarify/Preview Content\"";
 				DEVELOPMENT_TEAM = 89EXPD2XDP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -349,7 +351,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kaww.Framr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaww.squarify;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -360,7 +362,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		49160A6D2B5EDE1800943FA1 /* Build configuration list for PBXProject "Framr" */ = {
+		49160A6D2B5EDE1800943FA1 /* Build configuration list for PBXProject "Squarify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49160A7E2B5EDE1900943FA1 /* Debug */,
@@ -369,7 +371,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49160A802B5EDE1900943FA1 /* Build configuration list for PBXNativeTarget "Framr" */ = {
+		49160A802B5EDE1900943FA1 /* Build configuration list for PBXNativeTarget "Squarify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49160A812B5EDE1900943FA1 /* Debug */,

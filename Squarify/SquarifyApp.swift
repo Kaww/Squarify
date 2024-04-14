@@ -2,7 +2,7 @@ import SwiftUI
 import BaseApp
 
 @main
-struct FramrApp: App {
+struct SquarifyApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()
