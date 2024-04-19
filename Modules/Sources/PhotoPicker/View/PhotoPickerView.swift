@@ -5,6 +5,8 @@ import Design
 
 public struct PhotoPickerView: View {
 
+    @Environment(\.colorScheme) private var colorScheme
+
     @State private var pickedPhotos: [PhotosPickerItem] = []
     
     @State private var isLoading = false
@@ -33,12 +35,11 @@ public struct PhotoPickerView: View {
         .background {
             BackgroundBlurView()
         }
-        .preferredColorScheme(.light)
     }
 
     private var titleView: some View {
         Text("Squarify")
-            .foregroundStyle(.ultraThickMaterial)
+            .foregroundStyle(.white)
             .font(.system(size: 40, weight: .black))
             .shadow(color: .black.opacity(0.3), radius: 20)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,7 +64,7 @@ public struct PhotoPickerView: View {
             .disabled(isLoading)
 
             Text("Pick photos")
-                .foregroundStyle(.ultraThickMaterial)
+                .foregroundStyle(.white)
                 .font(.system(size: 20, weight: .semibold))
                 .shadow(color: .black.opacity(0.3), radius: 20)
                 .opacity(isLoading ? 0 : 1)

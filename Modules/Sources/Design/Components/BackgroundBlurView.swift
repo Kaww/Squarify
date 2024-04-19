@@ -16,7 +16,6 @@ public struct BackgroundBlurView: View {
         .receive(on: RunLoop.main)
 
     private let ballCount = 4
-    private let ballSize = 300
     private let ballColors: [Color] = [.aquamarine]
     private let backgroundColor = Color.risdBlue
 
@@ -24,6 +23,7 @@ public struct BackgroundBlurView: View {
 
     public var body: some View {
         GeometryReader { proxy in
+            let ballSize = proxy.size.width
             backgroundColor
                 .scaleEffect(2)
                 .ignoresSafeArea(edges: .vertical)
@@ -37,7 +37,6 @@ public struct BackgroundBlurView: View {
                 }
                 .onReceive(timer) { _ in
                     withAnimation(.easeInOut(duration: 5)) {
-
                         for i in 0..<ballCount {
                             balls[i].position = randomPosition(in: frameSize, ballSize: .init(width: ballSize, height: ballSize))
                         }
@@ -56,12 +55,12 @@ public struct BackgroundBlurView: View {
                 }
         }
         .blur(radius: 100)
+        .opacity(0.5)
         .overlay {
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea(.container)
         }
-        .preferredColorScheme(.light)
     }
 
     private func randomPosition(in bounds: CGSize, ballSize: CGSize) -> CGPoint {
