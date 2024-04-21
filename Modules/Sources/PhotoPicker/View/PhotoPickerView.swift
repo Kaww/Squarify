@@ -49,7 +49,7 @@ public struct PhotoPickerView: View {
         VStack(spacing: 16) {
             PhotosPicker(
                 selection: $pickedPhotos,
-                maxSelectionCount: 10,
+                maxSelectionCount: 36,
                 selectionBehavior: .ordered,
                 matching: .images,
                 preferredItemEncoding: .current,
