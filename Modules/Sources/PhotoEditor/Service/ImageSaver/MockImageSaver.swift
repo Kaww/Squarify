@@ -6,7 +6,7 @@ class MockImageSaver: ImageSaver {
     func save(withParams params: ImageSaverParameters, completion: @escaping () -> Void) {
         Task {
             for _ in params.images {
-                try? await Task.sleep(for: .seconds(0.2))
+                try? await Task.sleep(for: .seconds(1))
                 numberOfSavedImages += 1
             }
             await MainActor.run {

@@ -35,7 +35,6 @@ struct ExportButton: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isProcessing)
         }
         .buttonStyle(.plain)
-        .disabled(isProcessing)
     }
 
     private var exportButtonProcessingLabel: some View {

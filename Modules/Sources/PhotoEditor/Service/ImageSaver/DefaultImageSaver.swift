@@ -20,7 +20,6 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     @Published public var numberOfSavedImages: Int = 0
 
     public func save(withParams params: ImageSaverParameters, completion: @escaping () -> Void) {
-        print(Date.now)
         Task {
             for image in params.images {
                 autoreleasepool {
@@ -33,7 +32,6 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 numberOfSavedImages = 0
             }
         }
-        print(Date.now)
     }
 
     private func saveV3(_ photo: UIImage, borderValue: CGFloat, borderMode: BorderMode) {
@@ -96,8 +94,6 @@ public class DefaultImageSaver: NSObject, ImageSaver {
 
     @objc
     private func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
-        print("\(image) saved.")
-
         Task { @MainActor in
             self.numberOfSavedImages += 1
         }

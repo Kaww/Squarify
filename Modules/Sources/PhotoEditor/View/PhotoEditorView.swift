@@ -70,6 +70,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 thumbnailsLoadingView
             } else {
                 loadedView
+                    .disabled(isProcessing)
             }
         }
         .alert("Export finished 🎉", isPresented: $showExportFinishedAlert) {
@@ -83,7 +84,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
         .onChange(of: selectedBorderValue) { oldValue, newValue in
             borderValueDidChanged(newValue: newValue)
-
         }
         .onChange(of: selectedBorderMode) { oldValue, newValue in
             borderModeDidChanged()
@@ -284,7 +284,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                             RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 .fill(.ultraThinMaterial)
                         )
-                        .foregroundStyle(.sunglow)
+                        .tint(.sunglow)
                 }
                 .alert("Border Size", isPresented: $showBorderSizeInputAlertView) {
                     TextField("Ex: 200", value: $borderSizeAlertValue, format: .number)
@@ -403,10 +403,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             borderValue: selectedBorderValue,
             borderMode: selectedBorderMode
         )
-        imageSaver.save(withParams: params, completion: {
+        imageSaver.save(withParams: params) {
             isProcessing = false
             showExportFinishedAlert = true
-        })
+        }
     }
 
     private func finish() {
@@ -436,6 +436,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 #Preview {
     PhotoEditorView(
         imagesToEdit: [
+            UIImage(systemName: "photo")!,
+            UIImage(systemName: "camera.macro")!,
+            UIImage(systemName: "pawprint.fill")!,
             UIImage(systemName: "photo")!,
             UIImage(systemName: "camera.macro")!,
             UIImage(systemName: "pawprint.fill")!
