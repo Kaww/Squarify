@@ -44,15 +44,19 @@ struct ExportButton: View {
                 .transition(.opacity)
                 .tint(.black)
 
-            Text("Exporting... \(numberOfSavedImages) / \(numberOfImages)")
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.black)
+            Text(String(
+                format: "_exporting_label".localized,
+                "\(numberOfSavedImages)",
+                "\(numberOfImages)"
+            ))
+            .font(.system(size: 16, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(.black)
         }
     }
 
     private var exportButtonLabel: some View {
-        Label("Export all photos", systemImage: "square.and.arrow.up")
+        Label("_export_all_photos_label".localized, systemImage: "square.and.arrow.up")
             .labelStyle(.titleAndIcon)
             .font(.system(size: 16, weight: .bold, design: .rounded))
             .foregroundStyle(.black)
@@ -80,14 +84,14 @@ private struct ExportButtonPreview: View {
             .padding()
 
             Button(action: { numberOfSavedImages += 1 }) {
-                Text("Increment")
+                Text("_increment_button_label".localized)
             }
 
             Button(action: {
                 isProcessing = false
                 numberOfSavedImages = 0
             }) {
-                Text("Reset")
+                Text("_reset_button_label".localized)
             }
         }
     }

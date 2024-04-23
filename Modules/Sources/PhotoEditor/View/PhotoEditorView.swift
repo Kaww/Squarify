@@ -1,5 +1,6 @@
 import SwiftUI
 import Design
+import Localization
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
     
@@ -73,9 +74,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .disabled(isProcessing)
             }
         }
-        .alert("Export finished 🎉", isPresented: $showExportFinishedAlert) {
-            Button("Back home", role: .cancel, action: finish)
-            Button("Open Photos gallery", action: openPhotoApp)
+        .alert("_export_finished_alert_title".localized, isPresented: $showExportFinishedAlert) {
+            Button("_back_home_button_label".localized, role: .cancel, action: finish)
+            Button("_open_photos_gallery_button_label".localized, action: openPhotoApp)
         }
         .preferredColorScheme(.dark)
         .ignoresSafeArea(.keyboard)
@@ -95,7 +96,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private var headerView: some View {
         HStack() {
             Button(action: finish) {
-                Text("Cancel")
+                Text("_cancel_button_label".localized)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(.sunglow)
             }
@@ -103,7 +104,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Spacer()
         }
         .overlay {
-            Text("Editor")
+            Text("_editor_title_label".localized)
                 .font(.system(size: 18, weight: .medium))
         }
     }
@@ -111,7 +112,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private var thumbnailsLoadingView: some View {
         GeometryReader { proxy in
             VStack {
-                Text("Loading images...")
+                Text("_loading_images_label".localized)
                 ProgressView()
                     .progressViewStyle(.circular)
                     .tint(.sunglow)
@@ -152,7 +153,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .padding(.horizontal)
         .padding(.vertical, 8)
 
-        Text("Photos will be saved in your Photos gallery")
+        Text("_photos_saved_in_gallery_message".localized)
             .font(.system(size: 12, weight: .regular))
             .opacity(0.5)
             .transition(loadedViewSpringTransition(delay: 0.4))
@@ -179,10 +180,15 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .buttonStyle(.plain)
             .disabled(currentImageIndex <= 0)
 
-            Text("Image \(currentImageIndex + 1)/\(editingImages.count) • \(editingImages[currentImageIndex].sizeDescription)")
-                .monospacedDigit()
-                .font(.system(size: 12, weight: .medium))
-                .layoutPriority(1)
+            Text(String(
+                format: "_image_x_of_y_label".localized,
+                "\(currentImageIndex + 1)",
+                "\(editingImages.count)",
+                "\(editingImages[currentImageIndex].sizeDescription)"
+            ))
+            .monospacedDigit()
+            .font(.system(size: 12, weight: .medium))
+            .layoutPriority(1)
 
             Button(action: showNextPhoto) {
                 Image(systemName: "chevron.right")
@@ -231,7 +237,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             HStack {
                 Image(systemName: "square.dashed")
                     .frame(width: 20)
-                Text("Border Mode")
+                Text("_border_mode_label".localized)
             }
             .foregroundStyle(.white)
             .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -239,7 +245,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Spacer()
 
             Menu {
-                Picker("Mode", selection: $selectedBorderMode) {
+                Picker("_mode_picker_label".localized, selection: $selectedBorderMode) {
                     ForEach(BorderMode.allCases) { mode in
                         Label(
                             title: { Text(mode.title) },
@@ -268,7 +274,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 HStack {
                     Image(systemName: "slider.horizontal.3")
                         .frame(width: 20)
-                    Text("Border Size")
+                    Text("_border_size_label".localized)
                 }
                 .foregroundStyle(.white)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -286,12 +292,12 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         )
                         .tint(.sunglow)
                 }
-                .alert("Border Size", isPresented: $showBorderSizeInputAlertView) {
-                    TextField("Ex: 200", value: $borderSizeAlertValue, format: .number)
+                .alert("_border_size_label".localized, isPresented: $showBorderSizeInputAlertView) {
+                    TextField("_border_size_placeholder".localized, value: $borderSizeAlertValue, format: .number)
                         .keyboardType(.numberPad)
                         .foregroundStyle(.blue)
 
-                    Button("Apply") {
+                    Button("_apply_button_label".localized) {
                         if let borderSizeAlertValue {
                             let newValue = Double(borderSizeAlertValue)
                             selectedBorderValue = newValue >= Double(maxBorderValue) ? Double(maxBorderValue) : newValue
@@ -300,7 +306,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         borderSizeAlertValue = nil
                     }
 
-                    Button("Cancel", role: .cancel) {
+                    Button("_cancel_button_label".localized, role: .cancel) {
                         borderSizeAlertValue = nil
                     }
                 }

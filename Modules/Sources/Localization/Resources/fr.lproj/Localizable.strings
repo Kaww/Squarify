@@ -1,0 +1,24 @@
+"_pick_photos_button" = "Choisir des photos";
+
+"_fixed_border_mode_title" = "Fixe";
+"_proportional_border_mode_title" = "Proportionnel";
+
+"_exporting_label" = "Export en cours... %@ / %@";
+"_export_all_photos_label" = "Exporter toutes les photos";
+"_increment_button_label" = "Incrémenter";
+"_reset_button_label" = "Réinitialiser";
+
+"_export_finished_alert_title" = "Export terminé 🎉";
+"_back_home_button_label" = "Retour à l'accueil";
+"_open_photos_gallery_button_label" = "Ouvrir la galerie Photos";
+"_cancel_button_label" = "Annuler";
+"_editor_title_label" = "Éditeur";
+"_loading_images_label" = "Chargement des images...";
+"_photos_saved_in_gallery_message" = "Les photos seront enregistrées dans votre galerie Photos";
+"_image_x_of_y_label" = "Image %@/%@ • %@";
+"_border_mode_label" = "Mode de bordure";
+"_mode_picker_label" = "Mode";
+"_border_size_label" = "Taille de la bordure";
+"_border_size_placeholder" = "Ex : 200";
+"_apply_button_label" = "Appliquer";
+"_cancel_button_label" = "Annuler";

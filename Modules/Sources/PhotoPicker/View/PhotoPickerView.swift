@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 import Utils
 import Design
+import Localization
 
 public struct PhotoPickerView: View {
 
@@ -63,7 +64,7 @@ public struct PhotoPickerView: View {
             .transition(.opacity.combined(with: .scale))
             .disabled(isLoading)
 
-            Text("Pick photos")
+            Text("_pick_photos_button".localized)
                 .foregroundStyle(.white)
                 .font(.system(size: 20, weight: .semibold))
                 .shadow(color: .black.opacity(0.3), radius: 20)

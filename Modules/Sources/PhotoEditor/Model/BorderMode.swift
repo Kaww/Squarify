@@ -1,4 +1,5 @@
 import SwiftUI
+import Localization
 
 public enum BorderMode: String, CaseIterable, Identifiable  {
     case fixed
@@ -9,10 +10,10 @@ public enum BorderMode: String, CaseIterable, Identifiable  {
     var title: String {
         switch self {
         case .fixed:
-            return "Fixed"
+            return "_fixed_border_mode_title".localized
 
         case .proportional:
-            return "Proportional"
+            return "_proportional_border_mode_title".localized
         }
     }
 

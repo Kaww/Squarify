@@ -11,13 +11,13 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "BaseApp", targets: ["BaseApp"]),
         .library(name: "Design", targets: ["Design"]),
+        .library(name: "Localization", targets: ["Localization"]),
         .library(name: "PhotoEditor", targets: ["PhotoEditor"]),
         .library(name: "PhotoPicker", targets: ["PhotoPicker"]),
         .library(name: "Utils", targets: ["Utils"])
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+        // MARK: - Base App
         .target(
             name: "BaseApp",
             dependencies: [
@@ -31,6 +31,8 @@ let package = Package(
                 "BaseApp"
             ]
         ),
+
+        // MARK: - Design
         .target(
             name: "Design",
             dependencies: []
@@ -41,10 +43,25 @@ let package = Package(
                 "Design"
             ]
         ),
+
+        // MARK: - Localization
+        .target(
+            name: "Localization",
+            dependencies: []
+        ),
+        .testTarget(
+            name: "LocalizationTests",
+            dependencies: [
+                "Localization"
+            ]
+        ),
+
+        // MARK: - Photo Editor
         .target(
             name: "PhotoEditor",
             dependencies: [
-                "Design"
+                "Design",
+                "Localization"
             ]
         ),
         .testTarget(
@@ -53,11 +70,14 @@ let package = Package(
                 "PhotoEditor",
             ]
         ),
+
+        // MARK: - Photo Picker
         .target(
             name: "PhotoPicker",
             dependencies: [
                 "Utils",
-                "Design"
+                "Design",
+                "Localization"
             ]
         ),
         .testTarget(
@@ -66,6 +86,8 @@ let package = Package(
                 "PhotoPicker"
             ]
         ),
+
+        // MARK: - Utils
         .target(
             name: "Utils"
         ),

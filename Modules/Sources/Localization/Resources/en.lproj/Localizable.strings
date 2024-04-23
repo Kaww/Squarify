@@ -1,0 +1,24 @@
+"_pick_photos_button" = "Pick photos";
+
+"_fixed_border_mode_title" = "Fixed";
+"_proportional_border_mode_title" = "Proportional";
+
+"_exporting_label" = "Exporting... %@ / %@";
+"_export_all_photos_label" = "Export all photos";
+"_increment_button_label" = "Increment";
+"_reset_button_label" = "Reset";
+
+"_export_finished_alert_title" = "Export finished 🎉";
+"_back_home_button_label" = "Back home";
+"_open_photos_gallery_button_label" = "Open Photos gallery";
+"_cancel_button_label" = "Cancel";
+"_editor_title_label" = "Editor";
+"_loading_images_label" = "Loading images...";
+"_photos_saved_in_gallery_message" = "Photos will be saved in your Photos gallery";
+"_image_x_of_y_label" = "Image %@/%@ • %@";
+"_border_mode_label" = "Border Mode";
+"_mode_picker_label" = "Mode";
+"_border_size_label" = "Border Size";
+"_border_size_placeholder" = "Ex: 200";
+"_apply_button_label" = "Apply";
+"_cancel_button_label" = "Cancel";
