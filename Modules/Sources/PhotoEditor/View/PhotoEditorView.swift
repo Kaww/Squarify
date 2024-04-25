@@ -24,6 +24,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex = 0
 
     // Edition
+    @State private var selectedBorderColor: Color = .white
     @State private var selectedBorderMode: BorderMode = .fixed
     @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
@@ -211,7 +212,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func photoFrameView(image: UIImage) -> some View {
         GeometryReader { proxy in
-            Color.white
+            selectedBorderColor
                 .overlay {
                     Image(uiImage: image)
                         .resizable()
@@ -226,6 +227,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private var configView: some View {
         VStack(spacing: 8) {
+            borderColorConfigItem
             borderModeConfigItem
             borderSizeConfigItem
         }
@@ -327,6 +329,21 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
     }
 
+    private var borderColorConfigItem: some View {
+        HStack {
+            Image(systemName: "paintpalette.fill")
+                .frame(width: 20)
+
+            ColorPicker(
+                "_Color",
+                selection: $selectedBorderColor,
+                supportsOpacity: false
+            )
+            .foregroundStyle(.white)
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+        }
+    }
+
     // MARK: - Border Calculations
 
     private func updateBorderSize(
@@ -407,7 +424,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         let params = ImageSaverParameters(
             images: editingImages.map(\.image),
             borderValue: selectedBorderValue,
-            borderMode: selectedBorderMode
+            borderMode: selectedBorderMode,
+            color: UIColor(selectedBorderColor)
         )
         imageSaver.save(withParams: params) {
             isProcessing = false

@@ -23,7 +23,12 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         Task {
             for image in params.images {
                 autoreleasepool {
-                    saveV3(image, borderValue: params.borderValue, borderMode: params.borderMode)
+                    saveV3(
+                        image,
+                        borderValue: params.borderValue,
+                        borderMode: params.borderMode,
+                        borderColor: params.color
+                    )
                 }
                 try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
             }
@@ -34,8 +39,13 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         }
     }
 
-    private func saveV3(_ photo: UIImage, borderValue: CGFloat, borderMode: BorderMode) {
-        
+    private func saveV3(
+        _ photo: UIImage,
+        borderValue: CGFloat,
+        borderMode: BorderMode,
+        borderColor: UIColor
+    ) {
+
         // Calculate rendering border size
         let borderSize: CGFloat
         
@@ -53,7 +63,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 height: photo.size.largestSide
             ),
             borderWidth: borderSize,
-            borderColor: .white
+            borderColor: borderColor
         )
         let totalSize = renderingInfos.size
 
