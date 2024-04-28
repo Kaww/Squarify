@@ -127,7 +127,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .transition(.opacity.combined(with: .scale).animation(.spring))
     }
 
-
     @ViewBuilder
     private var loadedView: some View {
         photoFrameView(image: editingImages[currentImageIndex].thumbnail)
