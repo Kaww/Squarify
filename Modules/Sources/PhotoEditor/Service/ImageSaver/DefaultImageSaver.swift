@@ -7,7 +7,6 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     private struct ImageRenderingInfos {
         let size: CGSize
         let borderWidth: CGFloat
-        let borderColor: UIColor
 
         var innerImageAvailableSize: CGSize {
             .init(
@@ -27,7 +26,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                         image,
                         borderValue: params.borderValue,
                         borderMode: params.borderMode,
-                        borderColor: params.color
+                        backgroundMode: params.backgroundMode
                     )
                 }
                 try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
@@ -43,15 +42,15 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         _ photo: UIImage,
         borderValue: CGFloat,
         borderMode: BorderMode,
-        borderColor: UIColor
+        backgroundMode: BackgroundMode
     ) {
-
-        // Calculate rendering border size
+        // Calculate border size
         let borderSize: CGFloat
-        
+
         switch borderMode {
         case .fixed:
             borderSize = borderValue
+
         case .proportional:
             borderSize = borderValue / 100 * photo.size.largestSide
         }
@@ -62,8 +61,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 width: photo.size.largestSide,
                 height: photo.size.largestSide
             ),
-            borderWidth: borderSize,
-            borderColor: borderColor
+            borderWidth: borderSize
         )
         let totalSize = renderingInfos.size
 
@@ -84,18 +82,36 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         let renderer = UIGraphicsImageRenderer(size: renderingInfos.size, format: format)
 
         let framedImage = renderer.image { context in
-            renderingInfos.borderColor.setFill()
-
+            
             let fullRect = CGRect(x: 0, y: 0, width: totalSize.width, height: totalSize.width)
-            context.fill(fullRect)
+            
+            // Write background
+            switch backgroundMode {
+            case .color(let color):
+                color.setFill()
+                context.fill(fullRect)
+            
+            case .imageBlur:
+                UIColor.white.setFill()
+                context.fill(fullRect)
 
+                let blurAmount = BackgroundMode.blurAmountFor(photoSize: photo.size)
+                let enlargedRect = BackgroundMode
+                    .blurEnlargedSize(photoSize: photo.size)
+                    .centered(in: fullRect)
+
+                photo
+                    .blurred(amount: blurAmount)
+                    .draw(in: enlargedRect)
+            }
+
+            // Write image
             let imageRect = CGRect(
                 x: (totalSize.width - scaledImageSize.width) / 2,
                 y: (totalSize.height - scaledImageSize.height) / 2,
                 width: scaledImageSize.width,
                 height: scaledImageSize.height
             )
-
             photo.draw(in: imageRect)
         }
 
@@ -107,39 +123,5 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         Task { @MainActor in
             self.numberOfSavedImages += 1
         }
-    }
-}
-
-extension UIImage {
-    func scalePreservingAspectRatio(targetSize: CGSize) -> UIImage {
-        // Determine the scale factor that preserves aspect ratio
-        let widthRatio = targetSize.width / size.width
-        let heightRatio = targetSize.height / size.height
-
-        let scaleFactor = min(widthRatio, heightRatio)
-
-        // Compute the new image size that preserves aspect ratio
-        let scaledImageSize = CGSize(
-            width: (size.width * scaleFactor).rounded(),
-            height: (size.height * scaleFactor).rounded()
-        )
-
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-
-        let renderer = UIGraphicsImageRenderer(size: scaledImageSize, format: format)
-
-        return renderer.image { _ in
-            self.draw(in: CGRect(
-                origin: .zero,
-                size: scaledImageSize
-            ))
-        }
-    }
-}
-
-extension CGSize {
-    var largestSide: CGFloat {
-        width > height ? width : height
     }
 }

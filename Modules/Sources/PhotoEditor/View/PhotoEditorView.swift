@@ -25,7 +25,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     // Edition
     @State private var selectedBorderColor: Color = .white
-    @State private var selectedBorderMode: BorderMode = .fixed
+    @State private var selectedBorderMode: BorderMode = .proportional
     @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
     @State private var previewBoxingSize: CGSize = .zero
@@ -213,6 +213,15 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         GeometryReader { proxy in
             selectedBorderColor
                 .overlay {
+                    let enlarged = BackgroundMode.blurEnlargedSize(photoSize: proxy.size)
+                    let scale = enlarged.width / proxy.size.width
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaleEffect(scale)
+                        .aspectRatio(contentMode: .fill)
+                        .blur(radius: 2 * BackgroundMode.blurAmountFor(photoSize: proxy.size))
+                }
+                .overlay {
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -222,6 +231,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 }
         }
         .aspectRatio(contentMode: .fit)
+        .clipped()
     }
 
     private var configView: some View {
@@ -334,7 +344,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 .frame(width: 20)
 
             ColorPicker(
-                "_Color",
+                "_color_picker_label".localized,
                 selection: $selectedBorderColor,
                 supportsOpacity: false
             )
@@ -424,7 +434,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             images: editingImages.map(\.image),
             borderValue: selectedBorderValue,
             borderMode: selectedBorderMode,
-            color: UIColor(selectedBorderColor)
+            backgroundMode: .imageBlur
         )
         imageSaver.save(withParams: params) {
             isProcessing = false
