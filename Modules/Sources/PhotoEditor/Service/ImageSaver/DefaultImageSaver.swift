@@ -48,11 +48,11 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     ) {
         // Calculate border size
         let borderSize: CGFloat
-
+        
         switch borderMode {
         case .fixed:
             borderSize = borderValue
-
+        
         case .proportional:
             borderSize = borderValue / 100 * photo.size.largestSide
         }

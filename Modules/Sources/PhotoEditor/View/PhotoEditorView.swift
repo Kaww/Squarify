@@ -222,6 +222,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                             .scaleEffect(scale)
                             .aspectRatio(contentMode: .fill)
                             .blur(radius: 2 * BackgroundMode.blurAmountFor(photoSize: proxy.size))
+                            .transition(.scale.animation(.easeOut(duration: 0.3)))
                     }
                 }
                 .overlay {
@@ -238,12 +239,15 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     var backgroundColorView: some View {
-        switch selectedBackgroundMode {
-        case .color:
+        ZStack {
             selectedBackgroundColor
+                .zIndex(0)
 
-        case .imageBlur:
-            Color.white
+            if case .imageBlur = selectedBackgroundMode {
+                Color.white
+                    .zIndex(1)
+                    .transition(.opacity.animation(.linear(duration: 0.3)))
+            }
         }
     }
 
@@ -493,27 +497,12 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 #Preview {
     PhotoEditorView(
         imagesToEdit: [
-            UIImage(systemName: "photo")!,
-            UIImage(systemName: "camera.macro")!,
-            UIImage(systemName: "pawprint.fill")!,
-            UIImage(systemName: "photo")!,
-            UIImage(systemName: "camera.macro")!,
-            UIImage(systemName: "pawprint.fill")!
+            UIImage(resource: .img1),
+            UIImage(resource: .img2),
+            UIImage(resource: .img3)
         ],
         imageSaver: MockImageSaver(),
         thumbnailLoader: MockThumbnailLoader(),
         onCancel: {}
     )
-}
-
-extension View {
-    func configPickerLabelStyle() -> some View {
-        self.padding(.vertical, 5)
-        .padding(.horizontal, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
-        .tint(.sunglow)
-    }
 }
