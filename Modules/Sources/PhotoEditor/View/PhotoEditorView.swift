@@ -61,20 +61,31 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            headerView
-                .padding(.horizontal)
-                .padding(.top)
-                .padding(.bottom, 8)
-
-            if isFinished {
-                Spacer()
-            } else if editingImages.isEmpty {
-                thumbnailsLoadingView
-            } else {
-                loadedView
-                    .disabled(isProcessing)
+        NavigationView {
+            VStack(spacing: 0) {
+                if isFinished {
+                    Spacer()
+                } else if editingImages.isEmpty {
+                    thumbnailsLoadingView
+                } else {
+                    loadedView
+                        .disabled(isProcessing)
+                }
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: finish) {
+                        Text("_cancel_button_label".localized)
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.sunglow)
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("_editor_title_label".localized)
+                        .font(.system(size: 18, weight: .medium))
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
         }
         .alert("_export_finished_alert_title".localized, isPresented: $showExportFinishedAlert) {
             Button("_back_home_button_label".localized, role: .cancel, action: finish)
@@ -94,22 +105,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     // MARK: - Views
-
-    private var headerView: some View {
-        HStack() {
-            Button(action: finish) {
-                Text("_cancel_button_label".localized)
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.sunglow)
-            }
-
-            Spacer()
-        }
-        .overlay {
-            Text("_editor_title_label".localized)
-                .font(.system(size: 18, weight: .medium))
-        }
-    }
 
     private var thumbnailsLoadingView: some View {
         GeometryReader { proxy in
