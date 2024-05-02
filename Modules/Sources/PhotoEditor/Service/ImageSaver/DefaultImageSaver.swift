@@ -26,7 +26,8 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                         image,
                         borderValue: params.borderValue,
                         borderMode: params.borderMode,
-                        backgroundMode: params.backgroundMode
+                        backgroundMode: params.backgroundMode,
+                        backgroundColor: params.backgroundColor
                     )
                 }
                 try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
@@ -42,7 +43,8 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         _ photo: UIImage,
         borderValue: CGFloat,
         borderMode: BorderMode,
-        backgroundMode: BackgroundMode
+        backgroundMode: BackgroundMode,
+        backgroundColor: UIColor
     ) {
         // Calculate border size
         let borderSize: CGFloat
@@ -82,15 +84,15 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         let renderer = UIGraphicsImageRenderer(size: renderingInfos.size, format: format)
 
         let framedImage = renderer.image { context in
-            
+
             let fullRect = CGRect(x: 0, y: 0, width: totalSize.width, height: totalSize.width)
-            
+
             // Write background
             switch backgroundMode {
-            case .color(let color):
-                color.setFill()
+            case .color:
+                backgroundColor.setFill()
                 context.fill(fullRect)
-            
+
             case .imageBlur:
                 UIColor.white.setFill()
                 context.fill(fullRect)

@@ -5,4 +5,5 @@ public struct ImageSaverParameters {
     let borderValue: CGFloat
     let borderMode: BorderMode
     let backgroundMode: BackgroundMode
+    let backgroundColor: UIColor
 }

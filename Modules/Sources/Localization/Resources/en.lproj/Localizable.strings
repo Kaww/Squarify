@@ -16,10 +16,12 @@
 "_loading_images_label" = "Loading images...";
 "_photos_saved_in_gallery_message" = "Photos will be saved in your Photos gallery";
 "_image_x_of_y_label" = "Image %@/%@ • %@";
-"_color_picker_label" = "Color";
+"_background_picker_label" = "Background";
 "_border_mode_label" = "Border Mode";
 "_mode_picker_label" = "Mode";
 "_border_size_label" = "Border Size";
 "_border_size_placeholder" = "Ex: 200";
 "_apply_button_label" = "Apply";
 "_cancel_button_label" = "Cancel";
+"_color_background_mode_label" = "Color";
+"_blur_background_mode_label" = "Blur";

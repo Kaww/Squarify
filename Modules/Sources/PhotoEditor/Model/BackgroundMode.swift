@@ -1,16 +1,28 @@
 import UIKit
+import SwiftUI
 
-enum BackgroundMode {
-    case color(UIColor)
+enum BackgroundMode: CaseIterable, Hashable {
+    case color
     case imageBlur
 
-    var color: UIColor {
+
+    var title: String {
         switch self {
-        case .color(let color):
-            return color
+        case .color:
+            "_color_background_mode_label".localized
 
         case .imageBlur:
-            return .clear
+            "_blur_background_mode_label".localized
+        }
+    }
+
+    var icon: Image {
+        switch self {
+        case .color:
+            Image(systemName: "paintbrush.pointed.fill")
+
+        case .imageBlur:
+            Image(systemName: "wand.and.stars")
         }
     }
 

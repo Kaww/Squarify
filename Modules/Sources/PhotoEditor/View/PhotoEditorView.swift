@@ -24,7 +24,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex = 0
 
     // Edition
-    @State private var selectedBorderColor: Color = .white
+    @State private var selectedBackgroundMode: BackgroundMode = .color
+    @State private var selectedBackgroundColor: Color = .white
     @State private var selectedBorderMode: BorderMode = .proportional
     @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
@@ -211,15 +212,17 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func photoFrameView(image: UIImage) -> some View {
         GeometryReader { proxy in
-            selectedBorderColor
+            backgroundColorView
                 .overlay {
-                    let enlarged = BackgroundMode.blurEnlargedSize(photoSize: proxy.size)
-                    let scale = enlarged.width / proxy.size.width
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaleEffect(scale)
-                        .aspectRatio(contentMode: .fill)
-                        .blur(radius: 2 * BackgroundMode.blurAmountFor(photoSize: proxy.size))
+                    if case .imageBlur = selectedBackgroundMode {
+                        let enlarged = BackgroundMode.blurEnlargedSize(photoSize: proxy.size)
+                        let scale = enlarged.width / proxy.size.width
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaleEffect(scale)
+                            .aspectRatio(contentMode: .fill)
+                            .blur(radius: 2 * BackgroundMode.blurAmountFor(photoSize: proxy.size))
+                    }
                 }
                 .overlay {
                     Image(uiImage: image)
@@ -234,6 +237,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .clipped()
     }
 
+    var backgroundColorView: some View {
+        switch selectedBackgroundMode {
+        case .color:
+            selectedBackgroundColor
+
+        case .imageBlur:
+            Color.white
+        }
+    }
+
     private var configView: some View {
         VStack(spacing: 8) {
             borderColorConfigItem
@@ -241,6 +254,43 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             borderSizeConfigItem
         }
         .padding(.horizontal)
+    }
+
+    private var borderColorConfigItem: some View {
+        HStack {
+            Image(systemName: "paintpalette.fill")
+                .frame(width: 20)
+            
+            Text("_background_picker_label".localized)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+
+            Spacer()
+
+            if case .color = selectedBackgroundMode {
+                ColorPicker(
+                    "",
+                    selection: $selectedBackgroundColor,
+                    supportsOpacity: false
+                )
+                .foregroundStyle(.white)
+            }
+
+            Menu {
+                Picker("", selection: $selectedBackgroundMode) {
+                    ForEach(BackgroundMode.allCases, id: \.title) { mode in
+                        Label(
+                            title: { Text(mode.title) },
+                            icon: { mode.icon }
+                        )
+                        .tag(mode)
+                    }
+                }
+            } label: {
+                Text(selectedBackgroundMode.title)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .configPickerLabelStyle()
+            }
+        }
     }
 
     private var borderModeConfigItem: some View {
@@ -268,13 +318,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             } label: {
                 Text(selectedBorderMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                    )
-                    .tint(.sunglow)
+                    .configPickerLabelStyle()
             }
         }
     }
@@ -295,13 +339,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Button(action: { showBorderSizeInputAlertView = true }) {
                     Text("\(Int(selectedBorderValue)) \(selectedBorderMode.unit)")
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .fill(.ultraThinMaterial)
-                        )
-                        .tint(.sunglow)
+                        .configPickerLabelStyle()
                 }
                 .alert("_border_size_label".localized, isPresented: $showBorderSizeInputAlertView) {
                     TextField("_border_size_placeholder".localized, value: $borderSizeAlertValue, format: .number)
@@ -335,21 +373,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
-        }
-    }
-
-    private var borderColorConfigItem: some View {
-        HStack {
-            Image(systemName: "paintpalette.fill")
-                .frame(width: 20)
-
-            ColorPicker(
-                "_color_picker_label".localized,
-                selection: $selectedBorderColor,
-                supportsOpacity: false
-            )
-            .foregroundStyle(.white)
-            .font(.system(size: 16, weight: .medium, design: .rounded))
         }
     }
 
@@ -434,7 +457,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             images: editingImages.map(\.image),
             borderValue: selectedBorderValue,
             borderMode: selectedBorderMode,
-            backgroundMode: .imageBlur
+            backgroundMode: selectedBackgroundMode,
+            backgroundColor: UIColor(selectedBackgroundColor)
         )
         imageSaver.save(withParams: params) {
             isProcessing = false
@@ -480,4 +504,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         thumbnailLoader: MockThumbnailLoader(),
         onCancel: {}
     )
+}
+
+extension View {
+    func configPickerLabelStyle() -> some View {
+        self.padding(.vertical, 5)
+        .padding(.horizontal, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .tint(.sunglow)
+    }
 }
