@@ -72,10 +72,10 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         let widthRatio = targetImageSize.width / sourceImage.size.width
         let heightRatio = targetImageSize.height / sourceImage.size.height
 
-        let scaleFactor = min(widthRatio, heightRatio).rounded()
+        let scaleFactor = min(widthRatio, heightRatio)
         let scaledImageSize = CGSize(
-            width: sourceImage.size.width * scaleFactor,
-            height: sourceImage.size.height * scaleFactor
+            width: (sourceImage.size.width * scaleFactor).rounded(),
+            height: (sourceImage.size.height * scaleFactor).rounded()
         )
 
         // Start rendering
@@ -101,6 +101,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 let enlargedRect = BorderColorMode
                     .blurEnlargedSize(photoSize: sourceImage.size)
                     .centered(with: finalImageRect)
+                    .rounded()
 
                 sourceImage
                     .blurred(amount: blurAmount)
