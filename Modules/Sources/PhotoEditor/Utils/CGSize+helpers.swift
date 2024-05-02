@@ -9,7 +9,7 @@ extension CGSize {
         width < height ? width : height
     }
 
-    func centered(in rect: CGRect) -> CGRect {
+    func centered(with rect: CGRect) -> CGRect {
         .init(
             x: (rect.width - width) / 2,
             y: (rect.height - height) / 2,

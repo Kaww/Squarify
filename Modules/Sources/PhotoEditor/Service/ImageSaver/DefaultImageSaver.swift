@@ -8,7 +8,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         let size: CGSize
         let borderWidth: CGFloat
 
-        var innerImageAvailableSize: CGSize {
+        var imageSizeWithinBorders: CGSize {
             .init(
                 width: size.width - 2 * borderWidth,
                 height: size.height - 2 * borderWidth
@@ -40,42 +40,42 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     }
 
     private func saveV3(
-        _ photo: UIImage,
+        _ sourceImage: UIImage,
         borderValue: CGFloat,
         borderSizeMode: BorderSizeMode,
         borderColorMode: BorderColorMode,
         borderColor: UIColor
     ) {
         // Calculate border size
-        let borderSize: CGFloat
+        let borderWidth: CGFloat
         
         switch borderSizeMode {
         case .fixed:
-            borderSize = borderValue
+            borderWidth = borderValue
         
         case .proportional:
-            borderSize = borderValue / 100 * photo.size.largestSide
+            borderWidth = borderValue / 100 * sourceImage.size.largestSide
         }
 
         // Setup rendering infos
         let renderingInfos = ImageRenderingInfos(
             size: CGSize(
-                width: photo.size.largestSide,
-                height: photo.size.largestSide
+                width: sourceImage.size.largestSide,
+                height: sourceImage.size.largestSide
             ),
-            borderWidth: borderSize
+            borderWidth: borderWidth
         )
-        let totalSize = renderingInfos.size
+        let finalImageSize = renderingInfos.size
 
         // Image scaling calculations
-        let targetSize = renderingInfos.innerImageAvailableSize
-        let widthRatio = targetSize.width / photo.size.width
-        let heightRatio = targetSize.height / photo.size.height
+        let targetImageSize = renderingInfos.imageSizeWithinBorders
+        let widthRatio = targetImageSize.width / sourceImage.size.width
+        let heightRatio = targetImageSize.height / sourceImage.size.height
 
-        let scaleFactor = min(widthRatio, heightRatio)
+        let scaleFactor = min(widthRatio, heightRatio).rounded()
         let scaledImageSize = CGSize(
-            width: (photo.size.width * scaleFactor).rounded(),
-            height: (photo.size.height * scaleFactor).rounded()
+            width: sourceImage.size.width * scaleFactor,
+            height: sourceImage.size.height * scaleFactor
         )
 
         // Start rendering
@@ -83,41 +83,41 @@ public class DefaultImageSaver: NSObject, ImageSaver {
         format.scale = 1
         let renderer = UIGraphicsImageRenderer(size: renderingInfos.size, format: format)
 
-        let framedImage = renderer.image { context in
+        let finalImage = renderer.image { context in
 
-            let fullRect = CGRect(x: 0, y: 0, width: totalSize.width, height: totalSize.width)
+            let finalImageRect = CGRect(x: 0, y: 0, width: finalImageSize.width, height: finalImageSize.width)
 
             // Write background
             switch borderColorMode {
             case .color:
                 borderColor.setFill()
-                context.fill(fullRect)
+                context.fill(finalImageRect)
 
             case .imageBlur:
                 UIColor.white.setFill()
-                context.fill(fullRect)
+                context.fill(finalImageRect)
 
-                let blurAmount = BorderColorMode.blurAmountFor(photoSize: photo.size)
+                let blurAmount = BorderColorMode.blurAmountFor(photoSize: sourceImage.size)
                 let enlargedRect = BorderColorMode
-                    .blurEnlargedSize(photoSize: photo.size)
-                    .centered(in: fullRect)
+                    .blurEnlargedSize(photoSize: sourceImage.size)
+                    .centered(with: finalImageRect)
 
-                photo
+                sourceImage
                     .blurred(amount: blurAmount)
                     .draw(in: enlargedRect)
             }
 
             // Write image
             let imageRect = CGRect(
-                x: (totalSize.width - scaledImageSize.width) / 2,
-                y: (totalSize.height - scaledImageSize.height) / 2,
+                x: (finalImageSize.width - scaledImageSize.width) / 2,
+                y: (finalImageSize.height - scaledImageSize.height) / 2,
                 width: scaledImageSize.width,
                 height: scaledImageSize.height
             )
-            photo.draw(in: imageRect)
+            sourceImage.draw(in: imageRect)
         }
 
-        UIImageWriteToSavedPhotosAlbum(framedImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+        UIImageWriteToSavedPhotosAlbum(finalImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
     }
 
     @objc
