@@ -16,7 +16,7 @@
 "_loading_images_label" = "Loading images...";
 "_photos_saved_in_gallery_message" = "Photos will be saved in your Photos gallery";
 "_image_x_of_y_label" = "Image %@/%@ • %@";
-"_background_picker_label" = "Background";
+"_boder_color_picker_label" = "Style";
 "_border_mode_label" = "Border Mode";
 "_mode_picker_label" = "Mode";
 "_border_size_label" = "Border Size";

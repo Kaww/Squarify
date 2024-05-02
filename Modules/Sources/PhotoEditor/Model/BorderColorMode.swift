@@ -1,7 +1,7 @@
 import UIKit
 import SwiftUI
 
-enum BackgroundMode: CaseIterable, Hashable {
+enum BorderColorMode: CaseIterable, Hashable {
     case color
     case imageBlur
 

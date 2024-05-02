@@ -16,7 +16,7 @@
 "_loading_images_label" = "Chargement des images...";
 "_photos_saved_in_gallery_message" = "Les photos seront enregistrées dans votre galerie Photos";
 "_image_x_of_y_label" = "Image %@/%@ • %@";
-"_background_picker_label" = "Arrière plan";
+"_boder_color_picker_label" = "Style";
 "_border_mode_label" = "Mode de bordure";
 "_mode_picker_label" = "Mode";
 "_border_size_label" = "Taille de la bordure";

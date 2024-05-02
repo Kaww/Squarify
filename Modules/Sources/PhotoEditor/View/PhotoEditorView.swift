@@ -24,16 +24,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex = 0
 
     // Edition
-    @State private var selectedBackgroundMode: BackgroundMode = .color
-    @State private var selectedBackgroundColor: Color = .white
-    @State private var selectedBorderMode: BorderMode = .proportional
+    @State private var selectedBorderColorMode: BorderColorMode = .color
+    @State private var selectedBorderColor: Color = .white
+    @State private var selectedBorderSizeMode: BorderSizeMode = .proportional
     @State private var selectedBorderValue: Double = 0
     @State private var previewBorderSize: Double = 0
     @State private var previewBoxingSize: CGSize = .zero
 
     private let minBorderValue: Double = 0
     private var maxBorderValue: Double {
-        switch selectedBorderMode {
+        switch selectedBorderSizeMode {
         case .fixed:
             let largestSize: Int = _imagesToEdit.reduce(into: 100, { partialResult, image in
                 let imageLargestSide = Int(image.size.largestSide)
@@ -88,8 +88,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .onChange(of: selectedBorderValue) { oldValue, newValue in
             borderValueDidChanged(newValue: newValue)
         }
-        .onChange(of: selectedBorderMode) { oldValue, newValue in
-            borderModeDidChanged()
+        .onChange(of: selectedBorderSizeMode) { oldValue, newValue in
+            borderSizeModeDidChanged()
         }
     }
 
@@ -212,16 +212,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func photoFrameView(image: UIImage) -> some View {
         GeometryReader { proxy in
-            backgroundColorView
+            borderColorView
                 .overlay {
-                    if case .imageBlur = selectedBackgroundMode {
-                        let enlarged = BackgroundMode.blurEnlargedSize(photoSize: proxy.size)
+                    if case .imageBlur = selectedBorderColorMode {
+                        let enlarged = BorderColorMode.blurEnlargedSize(photoSize: proxy.size)
                         let scale = enlarged.width / proxy.size.width
                         Image(uiImage: image)
                             .resizable()
                             .scaleEffect(scale)
                             .aspectRatio(contentMode: .fill)
-                            .blur(radius: 2 * BackgroundMode.blurAmountFor(photoSize: proxy.size))
+                            .blur(radius: 2 * BorderColorMode.blurAmountFor(photoSize: proxy.size))
                             .transition(.scale.animation(.easeOut(duration: 0.3)))
                     }
                 }
@@ -238,12 +238,12 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .clipped()
     }
 
-    var backgroundColorView: some View {
+    var borderColorView: some View {
         ZStack {
-            selectedBackgroundColor
+            selectedBorderColor
                 .zIndex(0)
 
-            if case .imageBlur = selectedBackgroundMode {
+            if case .imageBlur = selectedBorderColorMode {
                 Color.white
                     .zIndex(1)
                     .transition(.opacity.animation(.linear(duration: 0.3)))
@@ -254,7 +254,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private var configView: some View {
         VStack(spacing: 8) {
             borderColorConfigItem
-            borderModeConfigItem
+            borderSizeModeConfigItem
             borderSizeConfigItem
         }
         .padding(.horizontal)
@@ -265,23 +265,23 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Image(systemName: "paintpalette.fill")
                 .frame(width: 20)
             
-            Text("_background_picker_label".localized)
+            Text("_boder_color_picker_label".localized)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
 
             Spacer()
 
-            if case .color = selectedBackgroundMode {
+            if case .color = selectedBorderColorMode {
                 ColorPicker(
                     "",
-                    selection: $selectedBackgroundColor,
+                    selection: $selectedBorderColor,
                     supportsOpacity: false
                 )
                 .foregroundStyle(.white)
             }
 
             Menu {
-                Picker("", selection: $selectedBackgroundMode) {
-                    ForEach(BackgroundMode.allCases, id: \.title) { mode in
+                Picker("", selection: $selectedBorderColorMode) {
+                    ForEach(BorderColorMode.allCases, id: \.title) { mode in
                         Label(
                             title: { Text(mode.title) },
                             icon: { mode.icon }
@@ -290,14 +290,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     }
                 }
             } label: {
-                Text(selectedBackgroundMode.title)
+                Text(selectedBorderColorMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .configPickerLabelStyle()
             }
         }
     }
 
-    private var borderModeConfigItem: some View {
+    private var borderSizeModeConfigItem: some View {
         HStack {
             HStack {
                 Image(systemName: "square.dashed")
@@ -310,8 +310,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Spacer()
 
             Menu {
-                Picker("_mode_picker_label".localized, selection: $selectedBorderMode) {
-                    ForEach(BorderMode.allCases) { mode in
+                Picker("_mode_picker_label".localized, selection: $selectedBorderSizeMode) {
+                    ForEach(BorderSizeMode.allCases) { mode in
                         Label(
                             title: { Text(mode.title) },
                             icon: { mode.icon }
@@ -320,7 +320,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     }
                 }
             } label: {
-                Text(selectedBorderMode.title)
+                Text(selectedBorderSizeMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .configPickerLabelStyle()
             }
@@ -341,7 +341,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Spacer()
 
                 Button(action: { showBorderSizeInputAlertView = true }) {
-                    Text("\(Int(selectedBorderValue)) \(selectedBorderMode.unit)")
+                    Text("\(Int(selectedBorderValue)) \(selectedBorderSizeMode.unit)")
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
                         .configPickerLabelStyle()
                 }
@@ -390,7 +390,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         let imageLargestSide = image.size.largestSide
         let borderValue: Double
 
-        switch selectedBorderMode {
+        switch selectedBorderSizeMode {
         case .fixed:
             borderValue = selectedBorderValue
 
@@ -421,7 +421,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         )
     }
 
-    private func borderModeDidChanged() {
+    private func borderSizeModeDidChanged() {
         selectedBorderValue = minBorderValue
         updateBorderSize(
             selectedBorderValue: selectedBorderValue,
@@ -460,9 +460,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         let params = ImageSaverParameters(
             images: editingImages.map(\.image),
             borderValue: selectedBorderValue,
-            borderMode: selectedBorderMode,
-            backgroundMode: selectedBackgroundMode,
-            backgroundColor: UIColor(selectedBackgroundColor)
+            borderSizeMode: selectedBorderSizeMode,
+            borderColorMode: selectedBorderColorMode,
+            borderColor: UIColor(selectedBorderColor)
         )
         imageSaver.save(withParams: params) {
             isProcessing = false

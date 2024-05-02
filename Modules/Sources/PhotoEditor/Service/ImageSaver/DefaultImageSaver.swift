@@ -25,9 +25,9 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                     saveV3(
                         image,
                         borderValue: params.borderValue,
-                        borderMode: params.borderMode,
-                        backgroundMode: params.backgroundMode,
-                        backgroundColor: params.backgroundColor
+                        borderSizeMode: params.borderSizeMode,
+                        borderColorMode: params.borderColorMode,
+                        borderColor: params.borderColor
                     )
                 }
                 try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
@@ -42,14 +42,14 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     private func saveV3(
         _ photo: UIImage,
         borderValue: CGFloat,
-        borderMode: BorderMode,
-        backgroundMode: BackgroundMode,
-        backgroundColor: UIColor
+        borderSizeMode: BorderSizeMode,
+        borderColorMode: BorderColorMode,
+        borderColor: UIColor
     ) {
         // Calculate border size
         let borderSize: CGFloat
         
-        switch borderMode {
+        switch borderSizeMode {
         case .fixed:
             borderSize = borderValue
         
@@ -88,17 +88,17 @@ public class DefaultImageSaver: NSObject, ImageSaver {
             let fullRect = CGRect(x: 0, y: 0, width: totalSize.width, height: totalSize.width)
 
             // Write background
-            switch backgroundMode {
+            switch borderColorMode {
             case .color:
-                backgroundColor.setFill()
+                borderColor.setFill()
                 context.fill(fullRect)
 
             case .imageBlur:
                 UIColor.white.setFill()
                 context.fill(fullRect)
 
-                let blurAmount = BackgroundMode.blurAmountFor(photoSize: photo.size)
-                let enlargedRect = BackgroundMode
+                let blurAmount = BorderColorMode.blurAmountFor(photoSize: photo.size)
+                let enlargedRect = BorderColorMode
                     .blurEnlargedSize(photoSize: photo.size)
                     .centered(in: fullRect)
 
