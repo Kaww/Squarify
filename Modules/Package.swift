@@ -61,7 +61,8 @@ let package = Package(
             name: "PhotoEditor",
             dependencies: [
                 "Design",
-                "Localization"
+                "Localization",
+                "Utils"
             ]
         ),
         .testTarget(
