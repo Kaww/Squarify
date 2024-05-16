@@ -248,7 +248,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private var configView: some View {
         VStack(spacing: 8) {
-            borderColorConfigItem
+//            borderColorConfigItem
             borderSizeModeConfigItem
             borderSizeConfigItem
         }
