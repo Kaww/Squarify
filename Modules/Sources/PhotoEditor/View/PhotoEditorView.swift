@@ -228,9 +228,18 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         .onAppear { previewBoxingSize = proxy.size }
                         .onChange(of: proxy.size) { previewBoxingSize = $1 }
                 }
+                .border(tooDarkImagePreviewBorder, width: 1)
+                .animation(.linear(duration: 0.1), value: selectedBorderColor)
         }
         .aspectRatio(contentMode: .fit)
         .clipped()
+    }
+
+    var tooDarkImagePreviewBorder: Color {
+        guard selectedBorderColorMode == .color else { return .clear }
+        return selectedBorderColor.isDark()
+        ? .white.opacity(0.4)
+        : .clear
     }
 
     var borderColorView: some View {
@@ -248,7 +257,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private var configView: some View {
         VStack(spacing: 8) {
-//            borderColorConfigItem
+            borderColorConfigItem
             borderSizeModeConfigItem
             borderSizeConfigItem
         }
@@ -265,30 +274,30 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
             Spacer()
 
-            if case .color = selectedBorderColorMode {
+//            if case .color = selectedBorderColorMode {
                 ColorPicker(
                     "",
                     selection: $selectedBorderColor,
                     supportsOpacity: false
                 )
                 .foregroundStyle(.white)
-            }
+//            }
 
-            Menu {
-                Picker("", selection: $selectedBorderColorMode) {
-                    ForEach(BorderColorMode.allCases, id: \.title) { mode in
-                        Label(
-                            title: { Text(mode.title) },
-                            icon: { mode.icon }
-                        )
-                        .tag(mode)
-                    }
-                }
-            } label: {
-                Text(selectedBorderColorMode.title)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .configPickerLabelStyle()
-            }
+//            Menu {
+//                Picker("", selection: $selectedBorderColorMode) {
+//                    ForEach(BorderColorMode.allCases, id: \.title) { mode in
+//                        Label(
+//                            title: { Text(mode.title) },
+//                            icon: { mode.icon }
+//                        )
+//                        .tag(mode)
+//                    }
+//                }
+//            } label: {
+//                Text(selectedBorderColorMode.title)
+//                    .font(.system(size: 16, weight: .medium, design: .rounded))
+//                    .configPickerLabelStyle()
+//            }
         }
     }
 
