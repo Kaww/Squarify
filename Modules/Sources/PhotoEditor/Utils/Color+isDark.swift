@@ -14,8 +14,7 @@ extension UIColor {
         else { return false }
         
         let brightness: CGFloat = ((first * 299) + (second * 587) + (third * 114)) / 1000
-        print("brightness is \(brightness)")
-        
+
         return brightness < 0.1 ? true : false
     }
 }

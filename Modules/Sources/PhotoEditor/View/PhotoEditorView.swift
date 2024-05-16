@@ -1,6 +1,7 @@
 import SwiftUI
 import Design
 import Localization
+import Utils
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
     
@@ -102,6 +103,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .onChange(of: selectedBorderSizeMode) { oldValue, newValue in
             borderSizeModeDidChanged()
         }
+        .onAppear { showAppStoreReviewIfNeeded() }
     }
 
     // MARK: - Views
@@ -471,6 +473,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         imageSaver.save(withParams: params) {
             isProcessing = false
             showExportFinishedAlert = true
+            AppStoreReview.recordCompletedEdition()
         }
     }
 
@@ -495,6 +498,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             try? await Task.sleep(for: .seconds(0.4))
             completion()
         }
+    }
+
+    private func showAppStoreReviewIfNeeded() {
+        AppStoreReview.tryAsk()
     }
 }
 
