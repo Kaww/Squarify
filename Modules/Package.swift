@@ -3,6 +3,10 @@
 
 import PackageDescription
 
+enum Dependency {
+    static let feedbacksKit: Target.Dependency = .product(name: "FeedbacksKit", package: "FeedbacksKit")
+}
+
 let package = Package(
     name: "Modules",
     defaultLocalization: "en",
@@ -16,13 +20,21 @@ let package = Package(
         .library(name: "PhotoPicker", targets: ["PhotoPicker"]),
         .library(name: "Utils", targets: ["Utils"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/Kaww/FeedbacksKit", from: "1.0.0")
+    ],
     targets: [
         // MARK: - Base App
         .target(
             name: "BaseApp",
             dependencies: [
+                "Design",
                 "PhotoEditor",
-                "PhotoPicker"
+                "PhotoPicker",
+                "Localization",
+                "Utils",
+
+                Dependency.feedbacksKit
             ]
         ),
         .testTarget(

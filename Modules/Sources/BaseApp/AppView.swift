@@ -1,6 +1,8 @@
 import SwiftUI
+import Design
 import PhotoEditor
 import PhotoPicker
+import Localization
 
 public struct AppView: View {
 
@@ -9,17 +11,45 @@ public struct AppView: View {
     public init() {}
 
     public var body: some View {
-        PhotoPickerView(selection: $photoSelection)
-            .fullScreenCover(item: $photoSelection) { selection in
-                PhotoEditorView(
-                    imagesToEdit: selection.photos,
-                    imageSaver: DefaultImageSaver(),
-                    thumbnailLoader: DefaultThumbnailLoader(),
-                    onCancel: {
-                        photoSelection = nil
+        NavigationStack {
+            PhotoPickerView(selection: $photoSelection)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .fullScreenCover(item: $photoSelection) { selection in
+                    PhotoEditorView(
+                        imagesToEdit: selection.photos,
+                        imageSaver: DefaultImageSaver(),
+                        thumbnailLoader: DefaultThumbnailLoader(),
+                        onCancel: {
+                            photoSelection = nil
+                        }
+                    )
+                }
+                .background {
+                    BackgroundBlurView()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        Text("Squarify")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 40, weight: .black))
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 2, y: 2)
                     }
-                )
-            }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            SettingsView()
+                        } label: {
+                            Label("_settings".localized, systemImage: "gearshape.fill")
+                                .labelStyle(.iconOnly)
+                                .font(.system(size: 20))
+                                .foregroundStyle(.white)
+                                .contentShape(Rectangle())
+                                .shadow(color: .black.opacity(0.1), radius: 4, x: 2, y: 2)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+        }
     }
 }
 

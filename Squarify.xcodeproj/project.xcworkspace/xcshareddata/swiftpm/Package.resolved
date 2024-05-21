@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "feedbackskit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Kaww/FeedbacksKit",
+      "state" : {
+        "revision" : "84c81fc9ada35d70b6b164272234fd1423ef987f",
+        "version" : "1.0.4"
+      }
+    }
+  ],
+  "version" : 2
+}

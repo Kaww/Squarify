@@ -5,9 +5,6 @@ import Design
 import Localization
 
 public struct PhotoPickerView: View {
-
-    @Environment(\.colorScheme) private var colorScheme
-
     @State private var pickedPhotos: [PhotosPickerItem] = []
     
     @State private var isLoading = false
@@ -21,29 +18,14 @@ public struct PhotoPickerView: View {
     }
 
     public var body: some View {
-        VStack {
-            titleView
-            photosPickerButton
-        }
-        .padding(16)
-        .onChange(of: pickedPhotos) {
-            process(pickerItems: $1)
-        }
-        .task {
-            try? await Task.sleep(for: .seconds(0.2))
-            hasAppeared = true
-        }
-        .background {
-            BackgroundBlurView()
-        }
-    }
-
-    private var titleView: some View {
-        Text("Squarify")
-            .foregroundStyle(.white)
-            .font(.system(size: 40, weight: .black))
-            .shadow(color: .black.opacity(0.3), radius: 20)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        photosPickerButton
+            .onChange(of: pickedPhotos) {
+                process(pickerItems: $1)
+            }
+            .task {
+                try? await Task.sleep(for: .seconds(0.2))
+                hasAppeared = true
+            }
     }
 
     private var photosPickerButton: some View {
@@ -73,7 +55,6 @@ public struct PhotoPickerView: View {
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.spring(duration: 0.4, bounce: 0.5).delay(0.2), value: hasAppeared)
         }
-        .frame(maxHeight: .infinity)
     }
 
     private var photosPickerLabel: some View {
