@@ -42,7 +42,10 @@ public struct BackgroundBlurView: View {
                         }
                     }
                 }
-                .onAppear {
+                .task {
+                    // sleep is a trick du to wring proxy size calculation when view is inside NavigationStack
+                    try? await Task.sleep(for: .milliseconds(50))
+                    
                     frameSize = proxy.size
                     balls = []
                     for _ in 0..<ballCount {
