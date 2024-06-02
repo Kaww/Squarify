@@ -58,25 +58,47 @@ struct SettingsView: View {
 
     // MARK: APP STORE REVIEW
 
+    private var appStoreURL: URL {
+        URL(string: "https://apps.apple.com/app/id\(appStoreID)")!
+    }
+
+    private var appStoreReviewURL: URL {
+        URL(string: "https://apps.apple.com/app/id\(appStoreID)?action=write-review")!
+    }
+
     private var loveSquarifyView: some View {
         Section {
-            Button(action: requestReviewManually) {
+            Button(action: { open(appStoreReviewURL) }) {
                 HStack {
                     itemImage(Image(systemName: "heart.fill"), color: .pinkLove)
                     Text("_write_a_review".localized)
                         .foregroundColor(.neutral0)
                 }
             }
+
+            HStack {
+                ShareLink(item: appStoreURL) {
+                    HStack {
+                        itemImage(Image(systemName: "square.and.arrow.up"), color: .pinkLove)
+                            .bold()
+                        Text("_share_app".localized)
+                            .foregroundColor(.neutral0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                Rectangle()
+                    .frame(width: 50)
+                    .opacity(0.001)
+                    .onLongPressGesture { open(appStoreURL) }
+            }
         } header: {
             Text("_you_love_squarify".localized)
         }
     }
 
-    private func requestReviewManually() {
-        let appStoreID = appStoreID
-        if let writeReviewURL = URL(string: "https://apps.apple.com/app/id\(appStoreID)?action=write-review") {
-            UIApplication.shared.open(writeReviewURL, options: [:], completionHandler: nil)
-        }
+    private func open(_ url: URL) {
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 

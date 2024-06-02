@@ -37,7 +37,7 @@ public struct BackgroundBlurView: View {
                 }
                 .onReceive(timer) { _ in
                     withAnimation(.easeInOut(duration: 5)) {
-                        for i in 0..<ballCount {
+                        for i in 0..<balls.count {
                             balls[i].position = randomPosition(in: frameSize, ballSize: .init(width: ballSize, height: ballSize))
                         }
                     }
