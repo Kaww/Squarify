@@ -87,13 +87,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .ignoresSafeArea(.keyboard)
         }
         .alert("_export_finished_alert_title".localized, isPresented: $showExportFinishedAlert) {
             Button("_back_home_button_label".localized, role: .cancel, action: finish)
             Button("_open_photos_gallery_button_label".localized, action: openPhotoApp)
         }
         .preferredColorScheme(.dark)
-        .ignoresSafeArea(.keyboard)
         .onChange(of: currentImageIndex) { oldValue, newValue in
             currentImageDidChanged(newImage: editingImages[newValue].image)
         }
