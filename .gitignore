@@ -1,3 +1,4 @@
 *.xcuserstate
 *xcuserdata*
 *Secrets.swift
+*.DS_Store
