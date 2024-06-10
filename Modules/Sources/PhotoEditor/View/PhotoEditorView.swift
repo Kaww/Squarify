@@ -1,4 +1,5 @@
 import SwiftUI
+import Photos
 import Design
 import Localization
 import Utils
@@ -20,6 +21,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var isFinished = false
     @State private var showBorderSizeInputAlertView = false
     @State private var borderSizeAlertValue: Int? = nil
+    @State private var showDoYouLikePrompt = false
+    @State private var showNoPhotoAccessAlert = false
 
     // Toolbar
     @State private var currentImageIndex = 0
@@ -93,6 +96,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Button("_back_home_button_label".localized, role: .cancel, action: finish)
             Button("_open_photos_gallery_button_label".localized, action: openPhotoApp)
         }
+        .alert("_photo_access_is_not_granted".localized, isPresented: $showNoPhotoAccessAlert) {
+            Button("_back_home_button_label".localized, role: .cancel, action: finish)
+            Button("_go_to_privacy_app_settings".localized, action: goToAppPrivacySettings)
+        }
         .preferredColorScheme(.dark)
         .onChange(of: currentImageIndex) { oldValue, newValue in
             currentImageDidChanged(newImage: editingImages[newValue].image)
@@ -103,7 +110,24 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .onChange(of: selectedBorderSizeMode) { oldValue, newValue in
             borderSizeModeDidChanged()
         }
-        .onAppear { showAppStoreReviewIfNeeded() }
+        .task {
+            if AppStoreReview.canAsk() {
+                try? await Task.sleep(for: .seconds(0.5))
+                showDoYouLikePrompt = true
+            }
+        }
+        .sheet(isPresented: $showDoYouLikePrompt) {
+            DoYouLikePromptView(
+                onLike: {
+                    showDoYouLikePrompt = false
+                    AppStoreReview.ask()
+                },
+                onDislike: {
+                    AppStoreReview.recordAsked()
+                },
+                onClose: { showDoYouLikePrompt = false }
+            )
+        }
     }
 
     // MARK: - Views
@@ -462,18 +486,29 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func saveImages() {
         isProcessing = true
-        
-        let params = ImageSaverParameters(
-            images: editingImages.map(\.image),
-            borderValue: selectedBorderValue,
-            borderSizeMode: selectedBorderSizeMode,
-            borderColorMode: selectedBorderColorMode,
-            borderColor: UIColor(selectedBorderColor)
-        )
-        imageSaver.save(withParams: params) {
-            isProcessing = false
-            showExportFinishedAlert = true
-            AppStoreReview.recordCompletedEdition()
+
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            switch status {
+            case .authorized:
+                let params = ImageSaverParameters(
+                    images: editingImages.map(\.image),
+                    borderValue: selectedBorderValue,
+                    borderSizeMode: selectedBorderSizeMode,
+                    borderColorMode: selectedBorderColorMode,
+                    borderColor: UIColor(selectedBorderColor)
+                )
+                imageSaver.save(withParams: params) {
+                    isProcessing = false
+                    showExportFinishedAlert = true
+                    AppStoreReview.recordCompletedEdition()
+                }
+
+            case .limited, .notDetermined, .restricted, .denied:
+                showNoPhotoAccessAlert = true
+
+            @unknown default:
+                break
+            }
         }
     }
 
@@ -500,8 +535,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
     }
 
-    private func showAppStoreReviewIfNeeded() {
-        AppStoreReview.tryAsk()
+    private func goToAppPrivacySettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString),
+              UIApplication.shared.canOpenURL(url) else {
+            assertionFailure("Not able to open App privacy settings")
+            return
+        }
+
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 

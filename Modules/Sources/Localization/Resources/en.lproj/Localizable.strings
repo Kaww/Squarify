@@ -34,3 +34,12 @@
 "_you_love_squarify" = "You love squarify?";
 
 "_share_app" = "Share Squarify";
+
+"_we_have_a_question_for_you" = "We have a question for you...";
+"_do_you_like_squarify" = "Do you like Squarify?";
+"_how_can_we_improve" = "How can we improve?";
+"_yes" = "Yes";
+"_no" = "No";
+
+"_photo_access_is_not_granted" = "Photo access not granted.";
+"_go_to_privacy_app_settings" = "Open Settings";

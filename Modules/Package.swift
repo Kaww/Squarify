@@ -47,7 +47,12 @@ let package = Package(
         // MARK: - Design
         .target(
             name: "Design",
-            dependencies: []
+            dependencies: [
+                "Localization",
+                "Utils",
+
+                Dependency.feedbacksKit
+            ]
         ),
         .testTarget(
             name: "DesignTests",

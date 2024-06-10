@@ -11,6 +11,7 @@
 		49160A7A2B5EDE1900943FA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49160A792B5EDE1900943FA1 /* Assets.xcassets */; };
 		49160A7D2B5EDE1900943FA1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49160A7C2B5EDE1900943FA1 /* Preview Assets.xcassets */; };
 		493D9DB02B61B3EC00245A1E /* BaseApp in Frameworks */ = {isa = PBXBuildFile; productRef = 493D9DAF2B61B3EC00245A1E /* BaseApp */; };
+		496C9CB62C174FD60020829A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 496C9CB52C174FD60020829A /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		492D885A2B61A1CD001F6B1D /* PhotoEditor.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoEditor.xctestplan; sourceTree = "<group>"; };
 		4960A02E2BB34E5900D520FE /* PhotoPicker.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoPicker.xctestplan; sourceTree = "<group>"; };
 		4967AB242B61B35100850A98 /* BaseApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseApp.xctestplan; sourceTree = "<group>"; };
+		496C9CB52C174FD60020829A /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		49C578462BB3516E00E9137A /* Utils.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Utils.xctestplan; sourceTree = "<group>"; };
 		49C578482BB3576200E9137A /* Design.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Design.xctestplan; sourceTree = "<group>"; };
 		49E067C72BCC60F800F4D111 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				49160A752B5EDE1800943FA1 /* SquarifyApp.swift */,
 				49160A792B5EDE1900943FA1 /* Assets.xcassets */,
 				49160A7B2B5EDE1900943FA1 /* Preview Content */,
+				496C9CB52C174FD60020829A /* InfoPlist.xcstrings */,
 			);
 			path = Squarify;
 			sourceTree = "<group>";
@@ -162,6 +165,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				496C9CB62C174FD60020829A /* InfoPlist.xcstrings in Resources */,
 				49160A7D2B5EDE1900943FA1 /* Preview Assets.xcassets in Resources */,
 				49160A7A2B5EDE1900943FA1 /* Assets.xcassets in Resources */,
 			);
@@ -314,7 +318,7 @@
 				INFOPLIST_FILE = Squarify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Squarify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to save images to your gallery";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow photo access to save your creations to your photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -352,7 +356,7 @@
 				INFOPLIST_FILE = Squarify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Squarify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to save images to your gallery";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow photo access to save your creations to your photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
