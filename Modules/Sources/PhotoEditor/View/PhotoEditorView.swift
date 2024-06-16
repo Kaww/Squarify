@@ -3,9 +3,14 @@ import Photos
 import Design
 import Localization
 import Utils
+import RevenueCat
+import RevenueCatUI
+import ConfettiSwiftUI
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
     
+    @Environment(ProPlanService.self) private var proPlanService
+
     // Services
     @StateObject private var imageSaver: Saver
     private let thumbnailLoader: any ThumbnailLoader
@@ -23,6 +28,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var borderSizeAlertValue: Int? = nil
     @State private var showDoYouLikePrompt = false
     @State private var showNoPhotoAccessAlert = false
+    @State private var showPaywall = false
+    @State private var confettiCannonTrigger: Int = 0
 
     // Toolbar
     @State private var currentImageIndex = 0
@@ -128,6 +135,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 onClose: { showDoYouLikePrompt = false }
             )
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+                .onPurchaseCompleted { _ in
+                    confettiCannonTrigger += 1
+                    proPlanService.refresh()
+                }
+
+        }
     }
 
     // MARK: - Views
@@ -174,6 +189,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .transition(loadedViewSpringTransition(delay: 0.3))
         .padding(.horizontal)
         .padding(.vertical, 8)
+        .confettiCannon(
+            counter: $confettiCannonTrigger,
+            num: 50,
+            confettiSize: 15,
+            radius: UIScreen.main.bounds.height * 3/4,
+            repetitions: 2,
+            repetitionInterval: 1
+        )
 
         Text("_photos_saved_in_gallery_message".localized)
             .font(.system(size: 12, weight: .regular))
@@ -300,31 +323,44 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
             Spacer()
 
-//            if case .color = selectedBorderColorMode {
-                ColorPicker(
-                    "",
-                    selection: $selectedBorderColor,
-                    supportsOpacity: false
-                )
-                .foregroundStyle(.white)
-//            }
-
-//            Menu {
-//                Picker("", selection: $selectedBorderColorMode) {
-//                    ForEach(BorderColorMode.allCases, id: \.title) { mode in
-//                        Label(
-//                            title: { Text(mode.title) },
-//                            icon: { mode.icon }
-//                        )
-//                        .tag(mode)
-//                    }
-//                }
-//            } label: {
-//                Text(selectedBorderColorMode.title)
-//                    .font(.system(size: 16, weight: .medium, design: .rounded))
-//                    .configPickerLabelStyle()
-//            }
+            if case .color = selectedBorderColorMode {
+                colorPickerView
+            }
+            borderModeMenuView
         }
+    }
+
+    private var colorPickerView: some View {
+        ColorPicker(
+            "",
+            selection: $selectedBorderColor,
+            supportsOpacity: false
+        )
+        .foregroundStyle(.white)
+    }
+
+    private var borderModeMenuView: some View {
+        Menu {
+            Picker("", selection: $selectedBorderColorMode) {
+                ForEach(BorderColorMode.allCases, id: \.title) { mode in
+                    Label(
+                        title: { Text(borerModeLabelTitle(mode: mode)) },
+                        icon: { mode.icon }
+                    )
+                    .tag(mode)
+                }
+            }
+        } label: {
+            Text(borerModeLabelTitle(mode: selectedBorderColorMode) )
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .configPickerLabelStyle()
+        }
+    }
+
+    private func borerModeLabelTitle(mode: BorderColorMode) -> String {
+        mode == .imageBlur && proPlanService.currentStatus == .notPro
+        ? mode.title + " (pro)"
+        : mode.title
     }
 
     private var borderSizeModeConfigItem: some View {
@@ -485,6 +521,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
 
     private func saveImages() {
+        let isUserPro = proPlanService.currentStatus == .pro
+        let hasUsedProFeatures = selectedBorderColorMode == .imageBlur
+
+        if !isUserPro && hasUsedProFeatures {
+            showPaywall = true
+            return
+        }
+
         isProcessing = true
 
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
@@ -557,4 +601,5 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         thumbnailLoader: MockThumbnailLoader(),
         onCancel: {}
     )
+    .environment(ProPlanService())
 }

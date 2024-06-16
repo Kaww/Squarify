@@ -29,4 +29,4 @@ extension CGSize {
     func enlargedBy(_ value: CGFloat) -> CGSize {
         .init(width: width + value, height: height + value)
     }
- }
+}

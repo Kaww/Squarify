@@ -5,6 +5,9 @@ import PackageDescription
 
 enum Dependency {
     static let feedbacksKit: Target.Dependency = .product(name: "FeedbacksKit", package: "FeedbacksKit")
+    static let revenueCat: Target.Dependency = .product(name: "RevenueCat", package: "purchases-ios-spm")
+    static let revenueCatUI: Target.Dependency = .product(name: "RevenueCatUI", package: "purchases-ios-spm")
+    static let confettiSwiftUI: Target.Dependency = .product(name: "ConfettiSwiftUI", package: "ConfettiSwiftUI")
 }
 
 let package = Package(
@@ -21,7 +24,9 @@ let package = Package(
         .library(name: "Utils", targets: ["Utils"])
     ],
     dependencies: [
-        .package(url: "https://github.com/Kaww/FeedbacksKit", from: "1.0.0")
+        .package(url: "https://github.com/Kaww/FeedbacksKit", from: "1.0.0"),
+        .package(url: "https://github.com/RevenueCat/purchases-ios-spm", from: "4.43.0"),
+        .package(url: "https://github.com/simibac/ConfettiSwiftUI", from: "1.0.0")
     ],
     targets: [
         // MARK: - Base App
@@ -34,7 +39,10 @@ let package = Package(
                 "Localization",
                 "Utils",
 
-                Dependency.feedbacksKit
+                Dependency.confettiSwiftUI,
+                Dependency.feedbacksKit,
+                Dependency.revenueCat,
+                Dependency.revenueCatUI
             ]
         ),
         .testTarget(
@@ -79,7 +87,11 @@ let package = Package(
             dependencies: [
                 "Design",
                 "Localization",
-                "Utils"
+                "Utils",
+
+                Dependency.confettiSwiftUI,
+                Dependency.revenueCat,
+                Dependency.revenueCatUI
             ]
         ),
         .testTarget(
@@ -107,7 +119,10 @@ let package = Package(
 
         // MARK: - Utils
         .target(
-            name: "Utils"
+            name: "Utils",
+            dependencies: [
+                Dependency.revenueCat
+            ]
         ),
         .testTarget(
             name: "UtilsTests",

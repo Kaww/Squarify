@@ -1,12 +1,30 @@
 {
   "pins" : [
     {
+      "identity" : "confettiswiftui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/simibac/ConfettiSwiftUI",
+      "state" : {
+        "revision" : "f45961f97bbae6fff6e2e64546fea0189425ad92",
+        "version" : "1.1.0"
+      }
+    },
+    {
       "identity" : "feedbackskit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Kaww/FeedbacksKit",
       "state" : {
         "revision" : "84c81fc9ada35d70b6b164272234fd1423ef987f",
         "version" : "1.0.4"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "7ec1091a6f929c40be2a1c695a63471f5d0c330d",
+        "version" : "4.43.0"
       }
     }
   ],

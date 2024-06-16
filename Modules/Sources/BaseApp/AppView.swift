@@ -3,12 +3,18 @@ import Design
 import PhotoEditor
 import PhotoPicker
 import Localization
+import Utils
 
 public struct AppView: View {
 
     @State private var photoSelection: PhotoSelection?
 
-    public init() {}
+    private let proPlanService: ProPlanService
+
+    public init() {
+        proPlanService = ProPlanService()
+        proPlanService.configure()
+    }
 
     public var body: some View {
         NavigationStack {
@@ -27,6 +33,7 @@ public struct AppView: View {
                     )
                 }
         }
+        .environment(proPlanService)
     }
 
     @ToolbarContentBuilder
