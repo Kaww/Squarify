@@ -15,7 +15,14 @@ public enum ProPlanResult {
 
     public var currentStatus: ProPlanStatus = .notPro
 
-    public init() {}
+    public init() {
+        guard let defaults = UserDefaults.squarify else {
+            fatalError("Unable to init app user defaults container.")
+        }
+        if defaults.bool(forKey: AppStorageKeys.isUserPro) == true {
+            currentStatus = .pro
+        }
+    }
 
     public func configure() {
         Purchases.configure(withAPIKey: revenueCatAPIKey)
@@ -25,11 +32,22 @@ public enum ProPlanResult {
 
     public func refresh() {
         Purchases.shared.getCustomerInfo { [weak self] customerInfo, error in
+            if error != nil { return }
             if customerInfo?.entitlements["pro"]?.isActive == true {
                 self?.currentStatus = .pro
+                self?.updateStatusInDefaults(.pro)
             } else {
                 self?.currentStatus = .notPro
+                self?.updateStatusInDefaults(.notPro)
             }
         }
+    }
+
+    private func updateStatusInDefaults(_ status: ProPlanStatus) {
+        guard let defaults = UserDefaults.squarify else {
+            fatalError("Unable to init app user defaults container.")
+        }
+        let isPro = status == .pro
+        defaults.set(isPro, forKey: AppStorageKeys.isUserPro)
     }
 }
