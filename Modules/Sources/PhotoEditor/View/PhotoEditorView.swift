@@ -138,6 +138,12 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView()
                 .onPurchaseCompleted { _ in
+                    showPaywall = false
+                    confettiCannonTrigger += 1
+                    proPlanService.refresh()
+                }
+                .onRestoreCompleted { _ in
+                    showPaywall = false
                     confettiCannonTrigger += 1
                     proPlanService.refresh()
                 }

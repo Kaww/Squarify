@@ -33,6 +33,12 @@ struct SettingsView: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView()
                 .onPurchaseCompleted { _ in
+                    showPaywall = false
+                    confettiCannonTrigger += 1
+                    proPlanService.refresh()
+                }
+                .onRestoreCompleted { _ in
+                    showPaywall = false
                     confettiCannonTrigger += 1
                     proPlanService.refresh()
                 }
@@ -155,9 +161,7 @@ struct SettingsView: View {
                 }
             },
             header: {
-                if !isPro {
-                    Text("_squarify_pro".localized)
-                }
+                Text("_squarify_pro".localized)
             },
             footer: {
                 if isPro {
