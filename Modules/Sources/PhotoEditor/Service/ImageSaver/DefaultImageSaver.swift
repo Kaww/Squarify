@@ -74,8 +74,8 @@ public class DefaultImageSaver: NSObject, ImageSaver {
 
         let scaleFactor = min(widthRatio, heightRatio)
         let scaledImageSize = CGSize(
-            width: (sourceImage.size.width * scaleFactor).rounded(),
-            height: (sourceImage.size.height * scaleFactor).rounded()
+            width: sourceImage.size.width * scaleFactor,
+            height: sourceImage.size.height * scaleFactor
         )
 
         // Start rendering
@@ -114,7 +114,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 y: (finalImageSize.height - scaledImageSize.height) / 2,
                 width: scaledImageSize.width,
                 height: scaledImageSize.height
-            )
+            ).rounded()
             sourceImage.draw(in: imageRect)
         }
 
