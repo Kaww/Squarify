@@ -14,7 +14,8 @@
 "_cancel_button_label" = "Annuler";
 "_editor_title_label" = "Éditeur";
 "_loading_images_label" = "Chargement des images...";
-"_photos_saved_in_gallery_message" = "Les photos seront enregistrées dans votre galerie Photos";
+"_photos_will_be_saved_in_gallery_message" = "Les photos seront enregistrées dans votre application Photos";
+"_photos_saved_in_gallery_message" = "Les photos ont été enregistrées dans votre application Photos !";
 "_image_x_of_y_label" = "Image %@/%@ • %@";
 "_boder_color_picker_label" = "Style";
 "_border_mode_label" = "Mode de bordure";

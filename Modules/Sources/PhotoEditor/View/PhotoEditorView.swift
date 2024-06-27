@@ -99,10 +99,21 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .navigationBarTitleDisplayMode(.inline)
             .ignoresSafeArea(.keyboard)
         }
-        .alert("_export_finished_alert_title".localized, isPresented: $showExportFinishedAlert) {
-            Button("_back_home_button_label".localized, role: .cancel, action: finish)
-            Button("_open_photos_gallery_button_label".localized, action: openPhotoApp)
-        }
+        .alert(
+            exportFinishedTitleText,
+            isPresented: $showExportFinishedAlert,
+            actions: {
+                Button("_back_home_button_label".localized, role: .cancel, action: finish)
+                if !ProcessInfo.processInfo.isiOSAppOnMac {
+                    Button("_open_photos_gallery_button_label".localized, action: openPhotoApp)
+                }
+            },
+            message: {
+                if !ProcessInfo.processInfo.isiOSAppOnMac {
+                    Text("_photos_saved_in_gallery_message".localized)
+                }
+            }
+        )
         .alert("_photo_access_is_not_granted".localized, isPresented: $showNoPhotoAccessAlert) {
             Button("_back_home_button_label".localized, role: .cancel, action: finish)
             Button("_go_to_privacy_app_settings".localized, action: goToAppPrivacySettings)
@@ -149,6 +160,15 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 }
 
         }
+    }
+
+    var exportFinishedTitleText: String {
+        var text = "_export_finished_alert_title".localized
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            text += "\n"
+            text += "_photos_saved_in_gallery_message".localized
+        }
+        return text
     }
 
     // MARK: - Views
@@ -204,7 +224,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             repetitionInterval: 1
         )
 
-        Text("_photos_saved_in_gallery_message".localized)
+        Text("_photos_will_be_saved_in_gallery_message".localized)
             .font(.system(size: 12, weight: .regular))
             .opacity(0.5)
             .transition(loadedViewSpringTransition(delay: 0.4))
@@ -571,8 +591,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private func openPhotoApp() {
         closeAnimation {
             onCancel()
-            if let photoAppURL = URL(string:"photos-redirect://") {
-                UIApplication.shared.open(photoAppURL)
+            if !ProcessInfo.processInfo.isiOSAppOnMac {
+                if let photoAppURL = URL(string:"photos-redirect://") {
+                    UIApplication.shared.open(photoAppURL)
+                }
             }
         }
     }
