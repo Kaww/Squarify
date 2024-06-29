@@ -32,7 +32,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var confettiCannonTrigger: Int = 0
 
     // Toolbar
-    @State private var currentImageIndex = 0
+    @State private var currentImageIndex: Int = 0
 
     // Edition
     @State private var selectedBorderColorMode: BorderColorMode = .color
@@ -59,6 +59,15 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
     }
 
+    var exportFinishedTitleText: String {
+        var text = "_export_finished_alert_title".localized
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            text += "\n"
+            text += "_photos_saved_in_gallery_message".localized
+        }
+        return text
+    }
+
     public init(
         imagesToEdit: [UIImage],
         imageSaver: Saver,
@@ -71,31 +80,21 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         self.onCancel = onCancel
     }
 
+    // MARK: - BODY
+
     public var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 if isFinished {
                     Spacer()
                 } else if editingImages.isEmpty {
-                    thumbnailsLoadingView
+                    loadingView
                 } else {
                     loadedView
                         .disabled(isProcessing)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: finish) {
-                        Text("_cancel_button_label".localized)
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundStyle(.sunglow)
-                    }
-                }
-                ToolbarItem(placement: .principal) {
-                    Text("_editor_title_label".localized)
-                        .font(.system(size: 18, weight: .medium))
-                }
-            }
+            .toolbar { toolbarContent }
             .navigationBarTitleDisplayMode(.inline)
             .ignoresSafeArea(.keyboard)
         }
@@ -134,46 +133,59 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 showDoYouLikePrompt = true
             }
         }
-        .sheet(isPresented: $showDoYouLikePrompt) {
-            DoYouLikePromptView(
-                onLike: {
-                    showDoYouLikePrompt = false
-                    AppStoreReview.ask()
-                },
-                onDislike: {
-                    AppStoreReview.recordAsked()
-                },
-                onClose: { showDoYouLikePrompt = false }
-            )
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
-                .onPurchaseCompleted { _ in
-                    showPaywall = false
-                    confettiCannonTrigger += 1
-                    proPlanService.refresh()
-                }
-                .onRestoreCompleted { _ in
-                    showPaywall = false
-                    confettiCannonTrigger += 1
-                    proPlanService.refresh()
-                }
+        .sheet(isPresented: $showDoYouLikePrompt) { doYouLikePromptView }
+        .sheet(isPresented: $showPaywall) { paywallView }
+    }
 
+    // MARK: - SHEETS CONTENT
+
+    private var doYouLikePromptView: some View {
+        DoYouLikePromptView(
+            onLike: {
+                showDoYouLikePrompt = false
+                AppStoreReview.ask()
+            },
+            onDislike: {
+                AppStoreReview.recordAsked()
+            },
+            onClose: { showDoYouLikePrompt = false }
+        )
+    }
+
+    private var paywallView: some View {
+        PaywallView()
+            .onPurchaseCompleted { _ in
+                showPaywall = false
+                confettiCannonTrigger += 1
+                proPlanService.refresh()
+            }
+            .onRestoreCompleted { _ in
+                showPaywall = false
+                confettiCannonTrigger += 1
+                proPlanService.refresh()
+            }
+    }
+
+    // MARK: - TOOLBAR CONTENT
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button(action: finish) {
+                Text("_cancel_button_label".localized)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.sunglow)
+            }
+        }
+        ToolbarItem(placement: .principal) {
+            Text("_editor_title_label".localized)
+                .font(.system(size: 18, weight: .medium))
         }
     }
 
-    var exportFinishedTitleText: String {
-        var text = "_export_finished_alert_title".localized
-        if ProcessInfo.processInfo.isiOSAppOnMac {
-            text += "\n"
-            text += "_photos_saved_in_gallery_message".localized
-        }
-        return text
-    }
+    // MARK: - VIEWS
 
-    // MARK: - Views
-
-    private var thumbnailsLoadingView: some View {
+    private var loadingView: some View {
         GeometryReader { proxy in
             VStack {
                 Text("_loading_images_label".localized)
@@ -183,9 +195,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     .controlSize(.large)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .task {
-                await loadThumbnails(ofSize: proxy.size)
-            }
+            .task { await loadThumbnails(ofSize: proxy.size) }
         }
         .transition(.opacity.combined(with: .scale).animation(.spring))
     }
@@ -196,10 +206,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .transition(loadedViewSpringTransition(delay: 0))
             .padding(.bottom, 8)
 
-        photoPreviewNavigationActions
-            .padding(.horizontal, 4)
-            .padding(.bottom, 16)
-            .transition(loadedViewSpringTransition(delay: 0.1))
+        PhotoPreviewActionBar(
+            currentImageIndex: $currentImageIndex,
+            numberOfImages: editingImages.count,
+            currentImage: editingImages[currentImageIndex]
+        )
+        .padding(.horizontal, 4)
+        .padding(.bottom, 16)
+        .transition(loadedViewSpringTransition(delay: 0.1))
 
         configView
             .transition(loadedViewSpringTransition(delay: 0.2))
@@ -236,48 +250,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
         let spring = Animation.spring.delay(delay)
         return .opacity.combined(with: .scale).animation(spring)
-    }
-
-    private var photoPreviewNavigationActions: some View {
-        HStack {
-            Button(action: showPreviousPhoto) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .padding(.leading, 4)
-            }
-            .buttonStyle(.plain)
-            .disabled(currentImageIndex <= 0)
-
-            Text(String(
-                format: "_image_x_of_y_label".localized,
-                "\(currentImageIndex + 1)",
-                "\(editingImages.count)",
-                "\(editingImages[currentImageIndex].sizeDescription)"
-            ))
-            .monospacedDigit()
-            .font(.system(size: 12, weight: .medium))
-            .layoutPriority(1)
-
-            Button(action: showNextPhoto) {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .contentShape(Rectangle())
-                    .padding(.trailing, 4)
-            }
-            .buttonStyle(.plain)
-            .disabled(currentImageIndex == editingImages.count - 1)
-        }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 4)
-        .background(
-            Capsule(style: .circular)
-                .fill(.ultraThinMaterial)
-        )
     }
 
     private func photoFrameView(image: UIImage) -> some View {
@@ -472,7 +444,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
     }
 
-    // MARK: - Border Calculations
+    // MARK: - BORDER CALCULATIONS
 
     private func updateBorderSize(
         selectedBorderValue: Double,
@@ -521,7 +493,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         )
     }
 
-    // MARK: - Actions
+    // MARK: - ACTIONS
 
     private func loadThumbnails(ofSize size: CGSize) async {
         var newEditingImages = [EditingImage]()
@@ -532,18 +504,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             }
         }
         self.editingImages = newEditingImages
-    }
-
-    private func showPreviousPhoto() {
-        if currentImageIndex > 0 {
-            currentImageIndex -= 1
-        }
-    }
-
-    private func showNextPhoto() {
-        if currentImageIndex < editingImages.count - 1 {
-            currentImageIndex += 1
-        }
     }
 
     private func saveImages() {
