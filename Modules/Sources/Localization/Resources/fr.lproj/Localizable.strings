@@ -16,7 +16,7 @@
 "_loading_images_label" = "Chargement des images...";
 "_photos_will_be_saved_in_gallery_message" = "Les photos seront enregistrées dans votre application Photos";
 "_photos_saved_in_gallery_message" = "Les photos ont été enregistrées dans votre application Photos !";
-"_image_x_of_y_label" = "Image %@/%@ • %@";
+"_image_x_of_y_label" = "Image %@/%@";
 "_boder_color_picker_label" = "Style";
 "_frame_size_mode_label" = "Mesure de la taille";
 "_mode_picker_label" = "Mode";

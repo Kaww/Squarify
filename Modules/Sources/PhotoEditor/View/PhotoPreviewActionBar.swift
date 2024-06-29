@@ -18,15 +18,21 @@ struct PhotoPreviewActionBar: View {
             .buttonStyle(.plain)
             .disabled(currentImageIndex <= 0)
 
-            Text(String(
-                format: "_image_x_of_y_label".localized,
-                "\(currentImageIndex + 1)",
-                "\(numberOfImages)",
-                "\(currentImage.sizeDescription)"
-            ))
+            Group {
+                Text(String(
+                    format: "_image_x_of_y_label".localized,
+                    "\(currentImageIndex + 1)",
+                    "\(numberOfImages)"
+                ))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .contentTransition(.numericText(value: Double(-currentImageIndex)))
+                .animation(.spring, value: currentImageIndex)
+
+                Text("\(currentImage.sizeDescription)")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
             .monospacedDigit()
             .font(.system(size: 12, weight: .medium))
-            .layoutPriority(1)
 
             Button(action: showNextPhoto) {
                 Image(systemName: "chevron.right")
@@ -60,11 +66,19 @@ struct PhotoPreviewActionBar: View {
     }
 }
 
+private struct PreviewView: View {
+    @State var toto: Int = 1
+
+    var body: some View {
+        PhotoPreviewActionBar(
+            currentImageIndex: $toto,
+            numberOfImages: 4,
+            currentImage: .mock
+        )
+        .preferredColorScheme(.dark)
+    }
+}
+
 #Preview {
-    PhotoPreviewActionBar(
-        currentImageIndex: .constant(2),
-        numberOfImages: 4,
-        currentImage: .mock
-    )
-    .preferredColorScheme(.dark)
+    PreviewView()
 }

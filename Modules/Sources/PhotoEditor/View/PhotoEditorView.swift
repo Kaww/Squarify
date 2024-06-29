@@ -83,7 +83,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     // MARK: - BODY
 
     public var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 if isFinished {
                     Spacer()
@@ -327,10 +327,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
             Spacer()
 
-            if case .color = selectedFrameColorMode {
-                colorPickerView
+            HStack(spacing: 0) {
+                frameColorModeMenuView
+                if case .color = selectedFrameColorMode {
+                    colorPickerView
+                }
             }
-            frameColorModeMenuView
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedFrameColorMode)
         }
     }
 
@@ -341,6 +344,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             supportsOpacity: false
         )
         .foregroundStyle(.white)
+        .transition(.scale.combined(with: .offset(x: 50)).combined(with: .opacity))
+        .frame(width: 40)
     }
 
     private var frameColorModeMenuView: some View {
@@ -358,6 +363,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Text(frameColorModeLabelTitle(mode: selectedFrameColorMode) )
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .configPickerLabelStyle()
+                .frame(width: 120, alignment: .trailing)
+                .animation(.spring(duration: 0.3), value: selectedFrameColorMode)
         }
     }
 
@@ -393,6 +400,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Text(selectedFrameSizeMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .configPickerLabelStyle()
+                    .frame(width: 120, alignment: .trailing)
+                    .animation(.spring(duration: 0.3), value: selectedFrameSizeMode)
             }
         }
     }
@@ -411,9 +420,17 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Spacer()
 
                 Button(action: { showFrameAmountInputView = true }) {
-                    Text("\(Int(selectedFrameAmount)) \(selectedFrameSizeMode.unit)")
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .configPickerLabelStyle()
+                    HStack(spacing: 5) {
+                        Text("\(Int(selectedFrameAmount))")
+                            .contentTransition(.numericText(value: selectedFrameAmount))
+
+                        Text("\(selectedFrameSizeMode.unit)")
+                    }
+                    .font(.system(size: 16, weight: .medium, design: .monospaced))
+                    .configPickerLabelStyle()
+                    .frame(width: 120, alignment: .trailing)
+                    .animation(.spring(duration: 0.3), value: selectedFrameAmount)
+                    .animation(.spring(duration: 0.3), value: selectedFrameSizeMode)
                 }
                 .alert("_frame_amount_label".localized, isPresented: $showFrameAmountInputView) {
                     TextField("_frame_amount_placeholder".localized, value: $frameAmountInputValue, format: .number)
