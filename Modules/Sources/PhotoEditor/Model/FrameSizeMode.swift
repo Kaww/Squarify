@@ -10,10 +10,10 @@ public enum FrameSizeMode: String, CaseIterable, Identifiable  {
     var title: String {
         switch self {
         case .fixed:
-            return "_fixed_border_mode_title".localized
+            return "_fixed_frame_size_mode_title".localized
 
         case .proportional:
-            return "_proportional_border_mode_title".localized
+            return "_proportional_frame_size_mode_title".localized
         }
     }
 

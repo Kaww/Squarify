@@ -1,7 +1,7 @@
 "_pick_photos_button" = "Choisir des photos";
 
-"_fixed_border_mode_title" = "Fixe";
-"_proportional_border_mode_title" = "Proportionnel";
+"_fixed_frame_size_mode_title" = "Fixe";
+"_proportional_frame_size_mode_title" = "Proportionnelle";
 
 "_exporting_label" = "Export en cours... %@ / %@";
 "_export_all_photos_label" = "Exporter toutes les photos";
@@ -18,13 +18,13 @@
 "_photos_saved_in_gallery_message" = "Les photos ont été enregistrées dans votre application Photos !";
 "_image_x_of_y_label" = "Image %@/%@ • %@";
 "_boder_color_picker_label" = "Style";
-"_border_mode_label" = "Mode de bordure";
+"_frame_size_mode_label" = "Mesure de la taille";
 "_mode_picker_label" = "Mode";
-"_border_size_label" = "Taille de la bordure";
-"_border_size_placeholder" = "Ex : 200";
+"_frame_amount_label" = "Taille du cadre";
+"_frame_amount_placeholder" = "Ex : 200";
 "_apply_button_label" = "Appliquer";
-"_color_background_mode_label" = "Couleur";
-"_blur_background_mode_label" = "Flou";
+"_color_frame_mode_label" = "Couleur";
+"_blur_frame_mode_label" = "Flou";
 
 "_settings" = "Paramètres";
 

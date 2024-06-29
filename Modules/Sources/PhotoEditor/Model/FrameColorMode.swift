@@ -8,10 +8,10 @@ enum FrameColorMode: CaseIterable, Hashable {
     var title: String {
         switch self {
         case .color:
-            "_color_background_mode_label".localized
+            "_color_frame_mode_label".localized
 
         case .imageBlur:
-            "_blur_background_mode_label".localized
+            "_blur_frame_mode_label".localized
         }
     }
 

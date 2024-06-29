@@ -366,7 +366,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             HStack {
                 Image(systemName: "square.dashed")
                     .frame(width: 20)
-                Text("_border_mode_label".localized)
+                Text("_frame_size_mode_label".localized)
             }
             .foregroundStyle(.white)
             .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -397,7 +397,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 HStack {
                     Image(systemName: "slider.horizontal.3")
                         .frame(width: 20)
-                    Text("_border_size_label".localized)
+                    Text("_frame_amount_label".localized)
                 }
                 .foregroundStyle(.white)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -409,8 +409,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
                         .configPickerLabelStyle()
                 }
-                .alert("_border_size_label".localized, isPresented: $showFrameAmountInputView) {
-                    TextField("_border_size_placeholder".localized, value: $frameAmountInputValue, format: .number)
+                .alert("_frame_amount_label".localized, isPresented: $showFrameAmountInputView) {
+                    TextField("_frame_amount_placeholder".localized, value: $frameAmountInputValue, format: .number)
                         .keyboardType(.numberPad)
                         .foregroundStyle(.blue)
 
