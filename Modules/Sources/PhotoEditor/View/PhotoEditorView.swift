@@ -229,18 +229,24 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .transition(loadedViewSpringTransition(delay: 0.3))
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .confettiCannon(
-            counter: $confettiCannonTrigger,
-            num: 50,
-            confettiSize: 15,
-            radius: UIScreen.main.bounds.height * 3/4,
-            repetitions: 2,
-            repetitionInterval: 1
+        .background(
+            Color.clear
+                .confettiCannon(
+                    counter: $confettiCannonTrigger,
+                    num: 50,
+                    confettiSize: 15,
+                    radius: UIScreen.main.bounds.height * 3/4,
+                    repetitions: 2,
+                    repetitionInterval: 1
+                )
         )
 
         Text("_photos_will_be_saved_in_gallery_message".localized)
             .font(.system(size: 12, weight: .regular))
             .opacity(0.5)
+            .padding(.horizontal)
+            .minimumScaleFactor(0.5)
+            .lineLimit(1)
             .transition(loadedViewSpringTransition(delay: 0.4))
     }
 
