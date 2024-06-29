@@ -6,12 +6,12 @@ public class DefaultImageSaver: NSObject, ImageSaver {
 
     private struct ImageRenderingInfos {
         let size: CGSize
-        let borderWidth: CGFloat
+        let frameWidth: CGFloat
 
-        var imageSizeWithinBorders: CGSize {
+        var imageSizeWithinFrame: CGSize {
             .init(
-                width: size.width - 2 * borderWidth,
-                height: size.height - 2 * borderWidth
+                width: size.width - 2 * frameWidth,
+                height: size.height - 2 * frameWidth
             )
         }
     }
@@ -24,10 +24,10 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 autoreleasepool {
                     saveV3(
                         image,
-                        borderValue: params.borderValue,
-                        borderSizeMode: params.borderSizeMode,
-                        borderColorMode: params.borderColorMode,
-                        borderColor: params.borderColor
+                        frameAmount: params.frameAmount,
+                        frameSizeMode: params.frameSizeMode,
+                        frameColorMode: params.frameColorMode,
+                        frameColor: params.frameColor
                     )
                 }
                 try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
@@ -41,20 +41,20 @@ public class DefaultImageSaver: NSObject, ImageSaver {
 
     private func saveV3(
         _ sourceImage: UIImage,
-        borderValue: CGFloat,
-        borderSizeMode: BorderSizeMode,
-        borderColorMode: BorderColorMode,
-        borderColor: UIColor
+        frameAmount: CGFloat,
+        frameSizeMode: FrameSizeMode,
+        frameColorMode: FrameColorMode,
+        frameColor: UIColor
     ) {
-        // Calculate border size
-        let borderWidth: CGFloat
-        
-        switch borderSizeMode {
+        // Calculate frame size
+        let frameWidth: CGFloat
+
+        switch frameSizeMode {
         case .fixed:
-            borderWidth = borderValue
-        
+            frameWidth = frameAmount
+
         case .proportional:
-            borderWidth = borderValue / 100 * sourceImage.size.largestSide
+            frameWidth = frameAmount / 100 * sourceImage.size.largestSide
         }
 
         // Setup rendering infos
@@ -63,12 +63,12 @@ public class DefaultImageSaver: NSObject, ImageSaver {
                 width: sourceImage.size.largestSide,
                 height: sourceImage.size.largestSide
             ),
-            borderWidth: borderWidth
+            frameWidth: frameWidth
         )
         let finalImageSize = renderingInfos.size
 
         // Image scaling calculations
-        let targetImageSize = renderingInfos.imageSizeWithinBorders
+        let targetImageSize = renderingInfos.imageSizeWithinFrame
         let widthRatio = targetImageSize.width / sourceImage.size.width
         let heightRatio = targetImageSize.height / sourceImage.size.height
 
@@ -88,17 +88,17 @@ public class DefaultImageSaver: NSObject, ImageSaver {
             let finalImageRect = CGRect(x: 0, y: 0, width: finalImageSize.width, height: finalImageSize.width)
 
             // Write background
-            switch borderColorMode {
+            switch frameColorMode {
             case .color:
-                borderColor.setFill()
+                frameColor.setFill()
                 context.fill(finalImageRect)
 
             case .imageBlur:
                 UIColor.white.setFill()
                 context.fill(finalImageRect)
 
-                let blurAmount = BorderColorMode.blurAmountFor(photoSize: sourceImage.size)
-                let enlargedRect = BorderColorMode
+                let blurAmount = FrameColorMode.blurAmountFor(photoSize: sourceImage.size)
+                let enlargedRect = FrameColorMode
                     .blurEnlargedSize(photoSize: sourceImage.size)
                     .centered(with: finalImageRect)
                     .rounded()

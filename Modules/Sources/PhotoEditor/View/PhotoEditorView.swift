@@ -24,8 +24,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var isProcessing = false
     @State private var showExportFinishedAlert = false
     @State private var isFinished = false
-    @State private var showBorderSizeInputAlertView = false
-    @State private var borderSizeAlertValue: Int? = nil
+    @State private var showFrameAmountInputView = false
+    @State private var frameAmountInputValue: Int? = nil
     @State private var showDoYouLikePrompt = false
     @State private var showNoPhotoAccessAlert = false
     @State private var showPaywall = false
@@ -35,16 +35,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex: Int = 0
 
     // Edition
-    @State private var selectedBorderColorMode: BorderColorMode = .color
-    @State private var selectedBorderColor: Color = .white
-    @State private var selectedBorderSizeMode: BorderSizeMode = .proportional
-    @State private var selectedBorderValue: Double = 0
-    @State private var previewBorderSize: Double = 0
+    @State private var selectedFrameColorMode: FrameColorMode = .color
+    @State private var selectedFrameColor: Color = FrameColorMode.defaultColor
+    @State private var selectedFrameSizeMode: FrameSizeMode = .proportional
+    @State private var selectedFrameAmount: Double = 0
+    @State private var previewFrameAmount: Double = 0
     @State private var previewBoxingSize: CGSize = .zero
 
-    private let minBorderValue: Double = 0
-    private var maxBorderValue: Double {
-        switch selectedBorderSizeMode {
+    private let minFrameAmount: Double = 0
+    private var maxFrameAmount: Double {
+        switch selectedFrameSizeMode {
         case .fixed:
             let largestSize: Int = _imagesToEdit.reduce(into: 100, { partialResult, image in
                 let imageLargestSide = Int(image.size.largestSide)
@@ -121,11 +121,11 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .onChange(of: currentImageIndex) { oldValue, newValue in
             currentImageDidChanged(newImage: editingImages[newValue].image)
         }
-        .onChange(of: selectedBorderValue) { oldValue, newValue in
-            borderValueDidChanged(newValue: newValue)
+        .onChange(of: selectedFrameAmount) { oldValue, newValue in
+            frameAmountDidChanged(newValue: newValue)
         }
-        .onChange(of: selectedBorderSizeMode) { oldValue, newValue in
-            borderSizeModeDidChanged()
+        .onChange(of: selectedFrameSizeMode) { oldValue, newValue in
+            frameSizeModeDidChanged()
         }
         .task {
             if AppStoreReview.canAsk() {
@@ -254,16 +254,16 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func photoFrameView(image: UIImage) -> some View {
         GeometryReader { proxy in
-            borderColorView
+            frameColorView
                 .overlay {
-                    if case .imageBlur = selectedBorderColorMode {
-                        let enlarged = BorderColorMode.blurEnlargedSize(photoSize: proxy.size)
+                    if case .imageBlur = selectedFrameColorMode {
+                        let enlarged = FrameColorMode.blurEnlargedSize(photoSize: proxy.size)
                         let scale = enlarged.width / proxy.size.width
                         Image(uiImage: image)
                             .resizable()
                             .scaleEffect(scale)
                             .aspectRatio(contentMode: .fill)
-                            .blur(radius: 2 * BorderColorMode.blurAmountFor(photoSize: proxy.size))
+                            .blur(radius: 2 * FrameColorMode.blurAmountFor(photoSize: proxy.size))
                             .transition(.scale.animation(.easeOut(duration: 0.3)))
                     }
                 }
@@ -271,30 +271,30 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .padding(previewBorderSize)
+                        .padding(previewFrameAmount)
                         .onAppear { previewBoxingSize = proxy.size }
                         .onChange(of: proxy.size) { previewBoxingSize = $1 }
                 }
                 .border(tooDarkImagePreviewBorder, width: 1)
-                .animation(.linear(duration: 0.1), value: selectedBorderColor)
+                .animation(.linear(duration: 0.1), value: selectedFrameColor)
         }
         .aspectRatio(contentMode: .fit)
         .clipped()
     }
 
     var tooDarkImagePreviewBorder: Color {
-        guard selectedBorderColorMode == .color else { return .clear }
-        return selectedBorderColor.isDark()
+        guard selectedFrameColorMode == .color else { return .clear }
+        return selectedFrameColor.isDark()
         ? .white.opacity(0.4)
         : .clear
     }
 
-    var borderColorView: some View {
+    var frameColorView: some View {
         ZStack {
-            selectedBorderColor
+            selectedFrameColor
                 .zIndex(0)
 
-            if case .imageBlur = selectedBorderColorMode {
+            if case .imageBlur = selectedFrameColorMode {
                 Color.white
                     .zIndex(1)
                     .transition(.opacity.animation(.linear(duration: 0.3)))
@@ -304,14 +304,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private var configView: some View {
         VStack(spacing: 8) {
-            borderColorConfigItem
-            borderSizeModeConfigItem
-            borderSizeConfigItem
+            frameColorConfigItem
+            frameSizeModeConfigItem
+            frameAmountConfigItem
         }
         .padding(.horizontal)
     }
 
-    private var borderColorConfigItem: some View {
+    private var frameColorConfigItem: some View {
         HStack {
             Image(systemName: "paintpalette.fill")
                 .frame(width: 20)
@@ -321,47 +321,47 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
             Spacer()
 
-            if case .color = selectedBorderColorMode {
+            if case .color = selectedFrameColorMode {
                 colorPickerView
             }
-            borderModeMenuView
+            frameColorModeMenuView
         }
     }
 
     private var colorPickerView: some View {
         ColorPicker(
             "",
-            selection: $selectedBorderColor,
+            selection: $selectedFrameColor,
             supportsOpacity: false
         )
         .foregroundStyle(.white)
     }
 
-    private var borderModeMenuView: some View {
+    private var frameColorModeMenuView: some View {
         Menu {
-            Picker("", selection: $selectedBorderColorMode) {
-                ForEach(BorderColorMode.allCases, id: \.title) { mode in
+            Picker("", selection: $selectedFrameColorMode) {
+                ForEach(FrameColorMode.allCases, id: \.title) { mode in
                     Label(
-                        title: { Text(borerModeLabelTitle(mode: mode)) },
+                        title: { Text(frameColorModeLabelTitle(mode: mode)) },
                         icon: { mode.icon }
                     )
                     .tag(mode)
                 }
             }
         } label: {
-            Text(borerModeLabelTitle(mode: selectedBorderColorMode) )
+            Text(frameColorModeLabelTitle(mode: selectedFrameColorMode) )
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .configPickerLabelStyle()
         }
     }
 
-    private func borerModeLabelTitle(mode: BorderColorMode) -> String {
+    private func frameColorModeLabelTitle(mode: FrameColorMode) -> String {
         mode == .imageBlur && proPlanService.currentStatus == .notPro
         ? mode.title + " (pro)"
         : mode.title
     }
 
-    private var borderSizeModeConfigItem: some View {
+    private var frameSizeModeConfigItem: some View {
         HStack {
             HStack {
                 Image(systemName: "square.dashed")
@@ -374,8 +374,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             Spacer()
 
             Menu {
-                Picker("_mode_picker_label".localized, selection: $selectedBorderSizeMode) {
-                    ForEach(BorderSizeMode.allCases) { mode in
+                Picker("_mode_picker_label".localized, selection: $selectedFrameSizeMode) {
+                    ForEach(FrameSizeMode.allCases) { mode in
                         Label(
                             title: { Text(mode.title) },
                             icon: { mode.icon }
@@ -384,14 +384,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     }
                 }
             } label: {
-                Text(selectedBorderSizeMode.title)
+                Text(selectedFrameSizeMode.title)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .configPickerLabelStyle()
             }
         }
     }
 
-    private var borderSizeConfigItem: some View {
+    private var frameAmountConfigItem: some View {
         VStack(spacing: 8) {
             HStack {
                 HStack {
@@ -404,91 +404,91 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
                 Spacer()
 
-                Button(action: { showBorderSizeInputAlertView = true }) {
-                    Text("\(Int(selectedBorderValue)) \(selectedBorderSizeMode.unit)")
+                Button(action: { showFrameAmountInputView = true }) {
+                    Text("\(Int(selectedFrameAmount)) \(selectedFrameSizeMode.unit)")
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
                         .configPickerLabelStyle()
                 }
-                .alert("_border_size_label".localized, isPresented: $showBorderSizeInputAlertView) {
-                    TextField("_border_size_placeholder".localized, value: $borderSizeAlertValue, format: .number)
+                .alert("_border_size_label".localized, isPresented: $showFrameAmountInputView) {
+                    TextField("_border_size_placeholder".localized, value: $frameAmountInputValue, format: .number)
                         .keyboardType(.numberPad)
                         .foregroundStyle(.blue)
 
                     Button("_apply_button_label".localized) {
-                        if let borderSizeAlertValue {
-                            let newValue = Double(borderSizeAlertValue)
-                            selectedBorderValue = newValue >= Double(maxBorderValue) ? Double(maxBorderValue) : newValue
+                        if let frameAmountInputValue {
+                            let newValue = Double(frameAmountInputValue)
+                            selectedFrameAmount = newValue >= Double(maxFrameAmount) ? Double(maxFrameAmount) : newValue
                         }
 
-                        borderSizeAlertValue = nil
+                        frameAmountInputValue = nil
                     }
 
                     Button("_cancel_button_label".localized, role: .cancel) {
-                        borderSizeAlertValue = nil
+                        frameAmountInputValue = nil
                     }
                 }
             }
 
             HStack(spacing: 16) {
-                Text("\(Int(minBorderValue))")
+                Text("\(Int(minFrameAmount))")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
 
-                Slider(value: $selectedBorderValue, in: minBorderValue...maxBorderValue, step: 1)
+                Slider(value: $selectedFrameAmount, in: minFrameAmount...maxFrameAmount, step: 1)
                     .tint(.sunglow)
 
-                Text("\(Int(maxBorderValue))")
+                Text("\(Int(maxFrameAmount))")
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
         }
     }
 
-    // MARK: - BORDER CALCULATIONS
+    // MARK: - FRAME CALCULATIONS
 
-    private func updateBorderSize(
-        selectedBorderValue: Double,
+    private func updateFrameAmount(
+        selectedFrameAmount: Double,
         image: UIImage,
         animate: Bool = true
     ) {
         let imageLargestSide = image.size.largestSide
-        let borderValue: Double
+        let frameAmount: Double
 
-        switch selectedBorderSizeMode {
+        switch selectedFrameSizeMode {
         case .fixed:
-            borderValue = selectedBorderValue
+            frameAmount = selectedFrameAmount
 
         case .proportional:
-            borderValue = selectedBorderValue / 100 * imageLargestSide
+            frameAmount = selectedFrameAmount / 100 * imageLargestSide
         }
 
-        let previewBorderRatio = borderValue / imageLargestSide
+        let previewFrameRatio = frameAmount / imageLargestSide
 
         let animation = animate ? Animation.spring(response: 0.4, dampingFraction: 0.6) : nil
         withAnimation(animation) {
-            previewBorderSize = previewBorderRatio * previewBoxingSize.largestSide
+            previewFrameAmount = previewFrameRatio * previewBoxingSize.largestSide
         }
     }
 
     private func currentImageDidChanged(newImage: UIImage) {
-        updateBorderSize(
-            selectedBorderValue: selectedBorderValue,
+        updateFrameAmount(
+            selectedFrameAmount: selectedFrameAmount,
             image: newImage,
             animate: false
         )
     }
 
-    private func borderValueDidChanged(newValue: Double) {
-        updateBorderSize(
-            selectedBorderValue: newValue,
+    private func frameAmountDidChanged(newValue: Double) {
+        updateFrameAmount(
+            selectedFrameAmount: newValue,
             image: editingImages[currentImageIndex].image
         )
     }
 
-    private func borderSizeModeDidChanged() {
-        selectedBorderValue = minBorderValue
-        updateBorderSize(
-            selectedBorderValue: selectedBorderValue,
+    private func frameSizeModeDidChanged() {
+        selectedFrameAmount = minFrameAmount
+        updateFrameAmount(
+            selectedFrameAmount: selectedFrameAmount,
             image: editingImages[currentImageIndex].image
         )
     }
@@ -508,7 +508,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
     private func saveImages() {
         let isUserPro = proPlanService.currentStatus == .pro
-        let hasUsedProFeatures = selectedBorderColorMode == .imageBlur
+        let hasUsedProFeatures = selectedFrameColorMode == .imageBlur
 
         if !isUserPro && hasUsedProFeatures {
             showPaywall = true
@@ -522,10 +522,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             case .authorized:
                 let params = ImageSaverParameters(
                     images: editingImages.map(\.image),
-                    borderValue: selectedBorderValue,
-                    borderSizeMode: selectedBorderSizeMode,
-                    borderColorMode: selectedBorderColorMode,
-                    borderColor: UIColor(selectedBorderColor)
+                    frameAmount: selectedFrameAmount,
+                    frameSizeMode: selectedFrameSizeMode,
+                    frameColorMode: selectedFrameColorMode,
+                    frameColor: UIColor(selectedFrameColor)
                 )
                 imageSaver.save(withParams: params) {
                     isProcessing = false

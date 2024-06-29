@@ -1,7 +1,7 @@
 import SwiftUI
 import Localization
 
-public enum BorderSizeMode: String, CaseIterable, Identifiable  {
+public enum FrameSizeMode: String, CaseIterable, Identifiable  {
     case fixed
     case proportional
 

@@ -1,10 +1,9 @@
 import UIKit
 import SwiftUI
 
-enum BorderColorMode: CaseIterable, Hashable {
+enum FrameColorMode: CaseIterable, Hashable {
     case color
     case imageBlur
-
 
     var title: String {
         switch self {
@@ -35,4 +34,6 @@ enum BorderColorMode: CaseIterable, Hashable {
             .zoomedToLargedSide()
             .enlargedBy(4 * blurAmountFor(photoSize: photoSize))
     }
+
+    static var defaultColor: Color { .white }
 }
