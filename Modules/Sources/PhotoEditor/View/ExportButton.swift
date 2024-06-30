@@ -3,38 +3,58 @@ import Design
 
 struct ExportButton: View {
 
-    private var isProcessing: Bool
+    enum LoadingState {
+        case idle
+        case processing
+        case done
+    }
+
+    private var loadingState: LoadingState
     private var numberOfImages: Int
     private var numberOfSavedImages: Int
     private var onTap: () -> Void
 
     init(
-        isProcessing: Bool,
+        loadingState: LoadingState,
         numberOfImages: Int,
         numberOfSavedImages: Int,
         onTap: @escaping () -> Void
     ) {
-        self.isProcessing = isProcessing
+        self.loadingState = loadingState
         self.numberOfImages = numberOfImages
         self.numberOfSavedImages = numberOfSavedImages
         self.onTap = onTap
     }
 
     var body: some View {
-        Button(action: onTap) {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .foregroundStyle(.sunglow)
+        Button(action: handleTap) {
+            Capsule(style: .continuous)
+                .foregroundStyle(loadingState == .done ? .green : .sunglow)
                 .frame(height: 40)
-                .overlay {
-                    if isProcessing {
-                        exportButtonProcessingLabel
-                    } else {
-                        exportButtonLabel
-                    }
-                }
-                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isProcessing)
+                .overlay { overlay }
+                .clipped()
+                .animation(.spring(response: 0.5, dampingFraction: 0.5), value: loadingState)
         }
         .buttonStyle(.plain)
+    }
+
+    private var overlay: some View {
+        ZStack {
+            switch loadingState {
+            case .idle:
+                exportButtonLabel
+            case .processing:
+                exportButtonProcessingLabel
+            case .done:
+                doneLabel
+            }
+        }
+    }
+
+    private func handleTap() {
+        if loadingState == .idle {
+            onTap()
+        }
     }
 
     private var exportButtonProcessingLabel: some View {
@@ -49,10 +69,13 @@ struct ExportButton: View {
                 "\(numberOfSavedImages)",
                 "\(numberOfImages)"
             ))
+            .contentTransition(.numericText(value: Double(-numberOfSavedImages)))
+            .animation(.default, value: numberOfSavedImages)
             .font(.system(size: 16, weight: .bold, design: .rounded))
             .monospacedDigit()
             .foregroundStyle(.black)
         }
+        .transition(.push(from: .top).combined(with: .opacity))
     }
 
     private var exportButtonLabel: some View {
@@ -60,7 +83,15 @@ struct ExportButton: View {
             .labelStyle(.titleAndIcon)
             .font(.system(size: 16, weight: .bold, design: .rounded))
             .foregroundStyle(.black)
-            .transition(.offset(y: 20).combined(with: .opacity))
+            .transition(.push(from: .top).combined(with: .opacity))
+    }
+
+    private var doneLabel: some View {
+        Label("_export_done_label".localized, systemImage: "checkmark")
+            .labelStyle(.titleAndIcon)
+            .font(.system(size: 16, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .transition(.push(from: .top).combined(with: .opacity))
     }
 }
 
@@ -70,28 +101,36 @@ struct ExportButton: View {
 
 private struct ExportButtonPreview: View {
 
-    @State private var isProcessing = false
+    @State private var loadingState = ExportButton.LoadingState.idle
     @State private var numberOfSavedImages = 0
+    private let numberOfImages = 9
 
     var body: some View {
         VStack {
             ExportButton(
-                isProcessing: isProcessing,
-                numberOfImages: 10,
+                loadingState: loadingState,
+                numberOfImages: numberOfImages,
                 numberOfSavedImages: numberOfSavedImages,
-                onTap: { isProcessing.toggle() }
+                onTap: {
+                    loadingState = .processing
+                }
             )
             .padding()
 
             Button(action: { numberOfSavedImages += 1 }) {
-                Text("_increment_button_label".localized)
+                Text("increment".localized)
             }
 
             Button(action: {
-                isProcessing = false
+                loadingState = .idle
                 numberOfSavedImages = 0
             }) {
-                Text("_reset_button_label".localized)
+                Text("reset".localized)
+            }
+        }
+        .onChangeOf(numberOfSavedImages) { _ in
+            if numberOfSavedImages == numberOfImages {
+                loadingState = .done
             }
         }
     }

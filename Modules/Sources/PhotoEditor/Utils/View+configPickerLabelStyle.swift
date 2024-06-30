@@ -3,10 +3,11 @@ import SwiftUI
 extension View {
     func configPickerLabelStyle() -> some View {
         self.padding(.vertical, 5)
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 12)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Capsule(style: .continuous)
                     .fill(.ultraThinMaterial)
+                    .brightness(0.02)
             )
             .tint(.sunglow)
     }

@@ -8,7 +8,7 @@ import RevenueCatUI
 import ConfettiSwiftUI
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
-    
+
     @Environment(ProPlanService.self) private var proPlanService
 
     // Services
@@ -21,7 +21,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     private let onCancel: () -> Void
 
     // Visual State
-    @State private var isProcessing = false
+    @State private var processingState: ExportButton.LoadingState = .idle
     @State private var showExportFinishedAlert = false
     @State private var isFinished = false
     @State private var showFrameAmountInputView = false
@@ -91,7 +91,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     loadingView
                 } else {
                     loadedView
-                        .disabled(isProcessing)
                 }
             }
             .toolbar { toolbarContent }
@@ -217,17 +216,18 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
         configView
             .transition(loadedViewSpringTransition(delay: 0.2))
+            .disabled(processingState == .processing)
 
         Spacer()
 
         ExportButton(
-            isProcessing: isProcessing,
+            loadingState: processingState,
             numberOfImages: editingImages.count,
             numberOfSavedImages: imageSaver.numberOfSavedImages,
             onTap: saveImages
         )
         .transition(loadedViewSpringTransition(delay: 0.3))
-        .padding(.horizontal)
+        .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .background(
             Color.clear
@@ -538,9 +538,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             return
         }
 
-        isProcessing = true
+        processingState = .processing
 
-        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+        Task {
+            try? await Task.sleep(for: .seconds(0.5))
+            
+            let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+
             switch status {
             case .authorized:
                 let params = ImageSaverParameters(
@@ -551,16 +555,18 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                     frameColor: UIColor(selectedFrameColor)
                 )
                 imageSaver.save(withParams: params) {
-                    isProcessing = false
-                    showExportFinishedAlert = true
+                    processingState = .done
                     AppStoreReview.recordCompletedEdition()
+                    Task {
+                        try? await Task.sleep(for: .seconds(0.8))
+                        showExportFinishedAlert = true
+                    }
                 }
 
             case .limited, .notDetermined, .restricted, .denied:
                 showNoPhotoAccessAlert = true
 
-            @unknown default:
-                break
+            @unknown default: break
             }
         }
     }

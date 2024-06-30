@@ -5,8 +5,7 @@
 
 "_exporting_label" = "Export en cours... %@ / %@";
 "_export_all_photos_label" = "Exporter toutes les photos";
-"_increment_button_label" = "Incrémenter";
-"_reset_button_label" = "Réinitialiser";
+"_export_done_label" = "Terminé !";
 
 "_export_finished_alert_title" = "Export terminé 🎉";
 "_back_home_button_label" = "Retour à l'accueil";
