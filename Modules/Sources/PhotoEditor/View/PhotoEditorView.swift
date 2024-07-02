@@ -24,8 +24,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var processingState: ExportButton.LoadingState = .idle
     @State private var showExportFinishedAlert = false
     @State private var isFinished = false
-    @State private var showFrameAmountInputView = false
-    @State private var frameAmountInputValue: Int? = nil
     @State private var showDoYouLikePrompt = false
     @State private var showNoPhotoAccessAlert = false
     @State private var showPaywall = false
@@ -214,9 +212,17 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .padding(.bottom, 16)
         .transition(loadedViewSpringTransition(delay: 0.1))
 
-        configView
-            .transition(loadedViewSpringTransition(delay: 0.2))
-            .disabled(processingState == .processing)
+        ConfigPanelView(
+            frameColor: $selectedFrameColor,
+            frameColorMode: $selectedFrameColorMode,
+            frameSizeMode: $selectedFrameSizeMode,
+            frameAmount: $selectedFrameAmount,
+            minFrameAmount: minFrameAmount,
+            maxFrameAmount: maxFrameAmount,
+            isPro: proPlanService.currentStatus == .pro
+        )
+        .transition(loadedViewSpringTransition(delay: 0.2))
+        .disabled(processingState == .processing)
 
         Spacer()
 
@@ -304,165 +310,6 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
                 Color.white
                     .zIndex(1)
                     .transition(.opacity.animation(.linear(duration: 0.3)))
-            }
-        }
-    }
-
-    private var configView: some View {
-        VStack(spacing: 8) {
-            frameColorConfigItem
-            frameSizeModeConfigItem
-            frameAmountConfigItem
-        }
-        .padding(.horizontal)
-    }
-
-    private var frameColorConfigItem: some View {
-        HStack {
-            Image(systemName: "paintpalette.fill")
-                .frame(width: 20)
-            
-            Text("_boder_color_picker_label".localized)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-
-            Spacer()
-
-            HStack(spacing: 0) {
-                frameColorModeMenuView
-                if case .color = selectedFrameColorMode {
-                    colorPickerView
-                }
-            }
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedFrameColorMode)
-        }
-    }
-
-    private var colorPickerView: some View {
-        ColorPicker(
-            "",
-            selection: $selectedFrameColor,
-            supportsOpacity: false
-        )
-        .foregroundStyle(.white)
-        .transition(.scale.combined(with: .offset(x: 50)).combined(with: .opacity))
-        .frame(width: 40)
-    }
-
-    private var frameColorModeMenuView: some View {
-        Menu {
-            Picker("", selection: $selectedFrameColorMode) {
-                ForEach(FrameColorMode.allCases, id: \.title) { mode in
-                    Label(
-                        title: { Text(frameColorModeLabelTitle(mode: mode)) },
-                        icon: { mode.icon }
-                    )
-                    .tag(mode)
-                }
-            }
-        } label: {
-            Text(frameColorModeLabelTitle(mode: selectedFrameColorMode) )
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .configPickerLabelStyle()
-                .frame(width: 120, alignment: .trailing)
-                .animation(.spring(duration: 0.3), value: selectedFrameColorMode)
-        }
-    }
-
-    private func frameColorModeLabelTitle(mode: FrameColorMode) -> String {
-        mode == .imageBlur && proPlanService.currentStatus == .notPro
-        ? mode.title + " (pro)"
-        : mode.title
-    }
-
-    private var frameSizeModeConfigItem: some View {
-        HStack {
-            HStack {
-                Image(systemName: "square.dashed")
-                    .frame(width: 20)
-                Text("_frame_size_mode_label".localized)
-            }
-            .foregroundStyle(.white)
-            .font(.system(size: 16, weight: .medium, design: .rounded))
-
-            Spacer()
-
-            Menu {
-                Picker("_mode_picker_label".localized, selection: $selectedFrameSizeMode) {
-                    ForEach(FrameSizeMode.allCases) { mode in
-                        Label(
-                            title: { Text(mode.title) },
-                            icon: { mode.icon }
-                        )
-                        .tag(mode)
-                    }
-                }
-            } label: {
-                Text(selectedFrameSizeMode.title)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .configPickerLabelStyle()
-                    .frame(width: 120, alignment: .trailing)
-                    .animation(.spring(duration: 0.3), value: selectedFrameSizeMode)
-            }
-        }
-    }
-
-    private var frameAmountConfigItem: some View {
-        VStack(spacing: 8) {
-            HStack {
-                HStack {
-                    Image(systemName: "slider.horizontal.3")
-                        .frame(width: 20)
-                    Text("_frame_amount_label".localized)
-                }
-                .foregroundStyle(.white)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-
-                Spacer()
-
-                Button(action: { showFrameAmountInputView = true }) {
-                    HStack(spacing: 5) {
-                        Text("\(Int(selectedFrameAmount))")
-                            .contentTransition(.numericText(value: selectedFrameAmount))
-
-                        Text("\(selectedFrameSizeMode.unit)")
-                    }
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
-                    .configPickerLabelStyle()
-                    .frame(width: 120, alignment: .trailing)
-                    .animation(.spring(duration: 0.3), value: selectedFrameAmount)
-                    .animation(.spring(duration: 0.3), value: selectedFrameSizeMode)
-                }
-                .alert("_frame_amount_label".localized, isPresented: $showFrameAmountInputView) {
-                    TextField("_frame_amount_placeholder".localized, value: $frameAmountInputValue, format: .number)
-                        .keyboardType(.numberPad)
-                        .foregroundStyle(.blue)
-
-                    Button("_apply_button_label".localized) {
-                        if let frameAmountInputValue {
-                            let newValue = Double(frameAmountInputValue)
-                            selectedFrameAmount = newValue >= Double(maxFrameAmount) ? Double(maxFrameAmount) : newValue
-                        }
-
-                        frameAmountInputValue = nil
-                    }
-
-                    Button("_cancel_button_label".localized, role: .cancel) {
-                        frameAmountInputValue = nil
-                    }
-                }
-            }
-
-            HStack(spacing: 16) {
-                Text("\(Int(minFrameAmount))")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
-
-                Slider(value: $selectedFrameAmount, in: minFrameAmount...maxFrameAmount, step: 1)
-                    .tint(.sunglow)
-
-                Text("\(Int(maxFrameAmount))")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
             }
         }
     }
