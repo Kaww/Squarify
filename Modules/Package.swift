@@ -32,6 +32,10 @@ let package = Package(
         // MARK: - Base App
         .target(
             name: "BaseApp",
+            resources: [
+                 .process("Resources")
+                 // This will process the /Sources/MyLibrary/Resources directory.
+             ],
             dependencies: [
                 "Design",
                 "PhotoEditor",

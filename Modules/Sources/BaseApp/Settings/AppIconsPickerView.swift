@@ -28,8 +28,18 @@ enum AppIcons: String, CaseIterable, Identifiable {
         }
     }
 
+  var filename: String {
+    switch self {
+    case .squarify:
+      return "icon-1"
+
+    case .squarifyPro:
+      return "icon-pro"
+    }
+  }
+
     var image: Image {
-        Image(uiImage: UIImage(named: rawValue) ?? UIImage(systemName: "person") ?? UIImage())
+      Image(self.filename, bundle: .module)
     }
 }
 
@@ -42,7 +52,7 @@ struct AppIconsPickerView: View {
             Text("_app_icons".localized)
                 .font(.system(size: 30, weight: .black))
                 .padding(.top)
-            
+
             Spacer()
 
             ForEach(AppIcons.allCases) { icon in
