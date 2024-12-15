@@ -17,8 +17,9 @@
 "_open_photos_gallery_button_label" = "Open Photos gallery";
 "_cancel_button_label" = "Cancel";
 "_editor_title_label" = "Editor";
+"_export_button_label" = "Export";
 "_loading_images_label" = "Loading images...";
-"_photos_will_be_saved_in_gallery_message" = "Photos will be saved in your Photos app";
+"_photos_are_saved_in_gallery_message" = "Photos are saved in your Photos app";
 "_photos_saved_in_gallery_message" = "Photos have been saved in your Photos app!";
 "_image_x_of_y_label" = "Image %@/%@";
 "_boder_color_picker_label" = "Style";
