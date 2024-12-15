@@ -33,6 +33,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     @State private var currentImageIndex: Int = 0
 
     // Edition
+    @State private var selectedAspectRatioMode: AspectRatioMode = .square
     @State private var selectedFrameColorMode: FrameColorMode = .color
     @State private var selectedFrameColor: Color = FrameColorMode.defaultColor
     @State private var selectedFrameSizeMode: FrameSizeMode = .proportional
@@ -213,6 +214,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .transition(loadedViewSpringTransition(delay: 0.1))
 
         ConfigPanelView(
+            aspectRatioMode: $selectedAspectRatioMode,  
             frameColor: $selectedFrameColor,
             frameColorMode: $selectedFrameColorMode,
             frameSizeMode: $selectedFrameSizeMode,

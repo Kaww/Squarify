@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConfigPanelView: View {
 
+    @Binding var aspectRatioMode: AspectRatioMode
     @Binding var frameColor: Color
     @Binding var frameColorMode: FrameColorMode
     @Binding var frameSizeMode: FrameSizeMode
@@ -15,12 +16,43 @@ struct ConfigPanelView: View {
 
     var body: some View {
         VStack(spacing: 8) {
+            aspectRationModeConfigItem
             frameColorConfigItem
             frameSizeModeConfigItem
             frameAmountConfigItem
         }
         .padding(.horizontal)
     }
+
+  private var aspectRationModeConfigItem: some View {
+    HStack {
+      HStack {
+        Image(systemName: "aspectratio")
+        Text("_aspect_ratio_mode_picker_label".localized)
+      }
+      .foregroundStyle(.white)
+      .font(.system(size: 16, weight: .medium, design: .rounded))
+      .frame(maxWidth: .infinity, alignment: .leading)
+
+      Menu {
+        Picker("_mode_picker_label".localized, selection: $aspectRatioMode) {
+          ForEach(AspectRatioMode.allCases) { mode in
+            Label(
+              title: { Text(mode.title) },
+              icon: { mode.icon }
+            )
+            .tag(mode)
+          }
+        }
+      } label: {
+          Text(aspectRatioMode.title)
+              .font(.system(size: 16, weight: .medium, design: .rounded))
+              .configPickerLabelStyle()
+              .frame(width: 150, alignment: .trailing)
+              .animation(.spring(duration: 0.3), value: aspectRatioMode)
+      }
+    }
+  }
 
     private var frameColorConfigItem: some View {
         HStack {
@@ -29,8 +61,7 @@ struct ConfigPanelView: View {
 
             Text("_boder_color_picker_label".localized)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
-
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 0) {
                 frameColorModeMenuView
@@ -88,8 +119,7 @@ struct ConfigPanelView: View {
             }
             .foregroundStyle(.white)
             .font(.system(size: 16, weight: .medium, design: .rounded))
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Menu {
                 Picker("_mode_picker_label".localized, selection: $frameSizeMode) {
@@ -121,8 +151,7 @@ struct ConfigPanelView: View {
                 }
                 .foregroundStyle(.white)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
-
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Button(action: { showFrameAmountInputView = true }) {
                     HStack(spacing: 5) {
@@ -174,6 +203,7 @@ struct ConfigPanelView: View {
 }
 
 private struct PreviewView: View {
+  @State private var selecteAspectRatioMode: AspectRatioMode = .square
     @State private var selectedFrameColor: Color = FrameColorMode.defaultColor
     @State private var selectedFrameColorMode: FrameColorMode = .color
     @State private var selectedFrameSizeMode: FrameSizeMode = .proportional
@@ -183,6 +213,7 @@ private struct PreviewView: View {
 
     var body: some View {
         ConfigPanelView(
+            aspectRatioMode: $selecteAspectRatioMode,
             frameColor: $selectedFrameColor,
             frameColorMode: $selectedFrameColorMode,
             frameSizeMode: $selectedFrameSizeMode,
