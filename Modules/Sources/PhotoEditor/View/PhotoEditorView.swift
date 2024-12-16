@@ -225,30 +225,33 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     Spacer()
   }
 
+  @ViewBuilder
   private var configPanelView: some View {
-    ConfigPanelView(
-      aspectRatioMode: $selectedAspectRatioMode,
-      frameColor: $selectedFrameColor,
-      frameColorMode: $selectedFrameColorMode,
-      frameSizeMode: $selectedFrameSizeMode,
-      frameAmount: $selectedFrameAmount,
-      minFrameAmount: minFrameAmount,
-      maxFrameAmount: maxFrameAmount,
-      isPro: proPlanService.currentStatus == .pro
-    )
-    .transition(loadedViewSpringTransition(delay: 0.2))
-    .disabled(processingState == .processing)
-    .background(
-      Color.clear
-        .confettiCannon(
-          counter: $confettiCannonTrigger,
-          num: 50,
-          confettiSize: 15,
-          radius: UIScreen.main.bounds.height * 3/4,
-          repetitions: 2,
-          repetitionInterval: 1
-        )
-    )
+    if !editingImages.isEmpty && !isFinished {
+      ConfigPanelView(
+        aspectRatioMode: $selectedAspectRatioMode,
+        frameColor: $selectedFrameColor,
+        frameColorMode: $selectedFrameColorMode,
+        frameSizeMode: $selectedFrameSizeMode,
+        frameAmount: $selectedFrameAmount,
+        minFrameAmount: minFrameAmount,
+        maxFrameAmount: maxFrameAmount,
+        isPro: proPlanService.currentStatus == .pro
+      )
+      .transition(loadedViewSpringTransition(delay: 0.2))
+      .disabled(processingState == .processing)
+      .background(
+        Color.clear
+          .confettiCannon(
+            counter: $confettiCannonTrigger,
+            num: 50,
+            confettiSize: 15,
+            radius: UIScreen.main.bounds.height * 3/4,
+            repetitions: 2,
+            repetitionInterval: 1
+          )
+      )
+    }
   }
 
   private func loadedViewSpringTransition(delay: TimeInterval) -> AnyTransition {
