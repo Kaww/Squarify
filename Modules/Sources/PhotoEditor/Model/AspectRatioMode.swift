@@ -17,7 +17,7 @@ enum AspectRatioMode: CaseIterable, Hashable, Identifiable {
       return Self.instaPortraitRatio
 
     case .instaLandscape:
-      return Self.instaPortraitRatio
+      return Self.instaLandscapeRatio
     }
   }
 

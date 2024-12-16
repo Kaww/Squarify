@@ -14,14 +14,64 @@ struct ConfigPanelView: View {
   @State private var showFrameAmountInputView = false
   @State private var frameAmountInputValue: Int? = nil
 
+  @State private var dragOffset: CGFloat = 0
+
   var body: some View {
     VStack(spacing: 8) {
+      grapIndicator
       aspectRationModeConfigItem
       frameColorConfigItem
       frameSizeModeConfigItem
       frameAmountConfigItem
     }
     .padding(.horizontal)
+    .padding(.top, 12)
+    .padding(.bottom)
+    .background(backgroundView)
+    .padding(.horizontal, 2)
+    .padding(.bottom, 2)
+    .gesture(
+      DragGesture(minimumDistance: 1, coordinateSpace: .global)
+        .onChanged { value in
+          let translation = value.translation.height
+          if translation > 0 {
+            dragOffset = translation
+          } else {
+            let limit: CGFloat = 300
+            let xOff = value.translation.width
+            let yOff = value.translation.height
+            let dist = sqrt(xOff*xOff + yOff*yOff);
+            let factor = 1 / (dist / limit + 1)
+            dragOffset = value.translation.height * factor
+          }
+        }
+        .onEnded { value in
+          withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+            dragOffset = 0
+          }
+        }
+    )
+    .offset(y: dragOffset)
+  }
+
+  private var backgroundView: some View {
+    ZStack {
+      RoundedRectangle(cornerRadius: 16, style: .continuous)
+        .fill(.ultraThinMaterial)
+
+      RoundedRectangle(cornerRadius: 16, style: .continuous)
+        .stroke(LinearGradient(
+          colors: [.clear, .white.opacity(0.3)],
+          startPoint: .top,
+          endPoint: .bottom
+        ), lineWidth: 0.5)
+    }
+  }
+
+  private var grapIndicator: some View {
+    Capsule(style: .continuous)
+      .fill(.white.opacity(0.5))
+      .frame(width: 28, height: 4)
   }
 
   private var aspectRationModeConfigItem: some View {
@@ -212,16 +262,26 @@ private struct PreviewView: View {
   private let maxFrameAmount: Double = 1000
 
   var body: some View {
-    ConfigPanelView(
-      aspectRatioMode: $selecteAspectRatioMode,
-      frameColor: $selectedFrameColor,
-      frameColorMode: $selectedFrameColorMode,
-      frameSizeMode: $selectedFrameSizeMode,
-      frameAmount: $selectedFrameAmount,
-      minFrameAmount: minFrameAmount,
-      maxFrameAmount: maxFrameAmount,
-      isPro: false
-    )
+    VStack {
+      Color.white
+        .aspectRatio(selecteAspectRatioMode.ratio, contentMode: .fit)
+        .padding(.top, 50)
+        .animation(.easeOut(duration: 0.2), value: selecteAspectRatioMode)
+      Spacer()
+    }
+    .overlay(alignment: .bottom) {
+      ConfigPanelView(
+        aspectRatioMode: $selecteAspectRatioMode,
+        frameColor: $selectedFrameColor,
+        frameColorMode: $selectedFrameColorMode,
+        frameSizeMode: $selectedFrameSizeMode,
+        frameAmount: $selectedFrameAmount,
+        minFrameAmount: minFrameAmount,
+        maxFrameAmount: maxFrameAmount,
+        isPro: false
+      )
+    }
+//    .border(.white.opacity(0.2), width: 1)
   }
 }
 

@@ -8,18 +8,18 @@ import RevenueCatUI
 import ConfettiSwiftUI
 
 public struct PhotoEditorView<Saver: ImageSaver>: View {
-  
+
   @Environment(ProPlanService.self) private var proPlanService
-  
+
   // Services
   @StateObject private var imageSaver: Saver
   private let thumbnailLoader: any ThumbnailLoader
-  
+
   // Data
   private let _imagesToEdit: [UIImage]
   @State private var editingImages: [EditingImage] = []
   private let onCancel: () -> Void
-  
+
   // Visual State
   @State private var processingState: ExportButton.LoadingState = .idle
   @State private var showExportFinishedAlert = false
@@ -28,10 +28,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   @State private var showNoPhotoAccessAlert = false
   @State private var showPaywall = false
   @State private var confettiCannonTrigger: Int = 0
-  
+
   // Toolbar
   @State private var currentImageIndex: Int = 0
-  
+
   // Edition
   @State private var selectedAspectRatioMode: AspectRatioMode = .square
   @State private var selectedFrameColorMode: FrameColorMode = .color
@@ -40,7 +40,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   @State private var selectedFrameAmount: Double = 0
   @State private var previewFrameAmount: Double = 0
   @State private var previewBoxingSize: CGSize = .zero
-  
+
   private let minFrameAmount: Double = 0
   private var maxFrameAmount: Double {
     switch selectedFrameSizeMode {
@@ -52,12 +52,12 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         }
       })
       return Double(Int(largestSize / 4))
-      
+
     case .proportional:
       return 25
     }
   }
-  
+
   var exportFinishedTitleText: String {
     var text = "_export_finished_alert_title".localized
     if ProcessInfo.processInfo.isiOSAppOnMac {
@@ -66,7 +66,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
     return text
   }
-  
+
   public init(
     imagesToEdit: [UIImage],
     imageSaver: Saver,
@@ -78,9 +78,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     self.thumbnailLoader = thumbnailLoader
     self.onCancel = onCancel
   }
-  
+
   // MARK: - BODY
-  
+
   public var body: some View {
     NavigationStack {
       VStack(spacing: 0) {
@@ -96,6 +96,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       .navigationBarTitleDisplayMode(.inline)
       .ignoresSafeArea(.keyboard)
     }
+    .overlay(alignment: .bottom) { configPanelView }
     .overlay { processingExportOverlay }
     .alert(
       exportFinishedTitleText,
@@ -135,9 +136,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     .sheet(isPresented: $showDoYouLikePrompt) { doYouLikePromptView }
     .sheet(isPresented: $showPaywall) { paywallView }
   }
-  
+
   // MARK: - SHEETS CONTENT
-  
+
   private var doYouLikePromptView: some View {
     DoYouLikePromptView(
       onLike: {
@@ -150,7 +151,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       onClose: { showDoYouLikePrompt = false }
     )
   }
-  
+
   private var paywallView: some View {
     PaywallView()
       .onPurchaseCompleted { _ in
@@ -164,9 +165,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         proPlanService.refresh()
       }
   }
-  
+
   // MARK: - TOOLBAR CONTENT
-  
+
   @ToolbarContentBuilder
   private var toolbarContent: some ToolbarContent {
     ToolbarItem(placement: .topBarLeading) {
@@ -190,9 +191,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       }
     }
   }
-  
+
   // MARK: - VIEWS
-  
+
   private var loadingView: some View {
     GeometryReader { proxy in
       VStack {
@@ -207,24 +208,26 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
     .transition(.opacity.combined(with: .scale).animation(.spring))
   }
-  
+
   @ViewBuilder
   private var loadedView: some View {
     photoFrameView(image: editingImages[currentImageIndex].thumbnail)
       .transition(loadedViewSpringTransition(delay: 0))
       .padding(.bottom, 8)
-    
+
     PhotoPreviewActionBar(
       currentImageIndex: $currentImageIndex,
       numberOfImages: editingImages.count,
       currentImage: editingImages[currentImageIndex]
     )
-    .padding(.horizontal, 4)
-    .padding(.bottom, 16)
     .transition(loadedViewSpringTransition(delay: 0.1))
-    
+
+    Spacer()
+  }
+
+  private var configPanelView: some View {
     ConfigPanelView(
-      aspectRatioMode: $selectedAspectRatioMode,  
+      aspectRatioMode: $selectedAspectRatioMode,
       frameColor: $selectedFrameColor,
       frameColorMode: $selectedFrameColorMode,
       frameSizeMode: $selectedFrameSizeMode,
@@ -247,7 +250,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         )
     )
   }
-  
+
   private func loadedViewSpringTransition(delay: TimeInterval) -> AnyTransition {
     if thumbnailLoader is MockThumbnailLoader {
       return .identity
@@ -255,7 +258,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     let spring = Animation.spring.delay(delay)
     return .opacity.combined(with: .scale).animation(spring)
   }
-  
+
   private func photoFrameView(image: UIImage) -> some View {
     GeometryReader { proxy in
       frameColorView
@@ -285,19 +288,19 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     .aspectRatio(contentMode: .fit)
     .clipped()
   }
-  
+
   private var tooDarkImagePreviewBorder: Color {
     guard selectedFrameColorMode == .color else { return .clear }
     return selectedFrameColor.isDark()
     ? .white.opacity(0.4)
     : .clear
   }
-  
+
   private var frameColorView: some View {
     ZStack {
       selectedFrameColor
         .zIndex(0)
-      
+
       if case .imageBlur = selectedFrameColorMode {
         Color.white
           .zIndex(1)
@@ -382,7 +385,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   }
 
   // MARK: - FRAME CALCULATIONS
-  
+
   private func updateFrameAmount(
     selectedFrameAmount: Double,
     image: UIImage,
@@ -390,23 +393,23 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   ) {
     let imageLargestSide = image.size.largestSide
     let frameAmount: Double
-    
+
     switch selectedFrameSizeMode {
     case .fixed:
       frameAmount = selectedFrameAmount
-      
+
     case .proportional:
       frameAmount = selectedFrameAmount / 100 * imageLargestSide
     }
-    
+
     let previewFrameRatio = frameAmount / imageLargestSide
-    
+
     let animation = animate ? Animation.spring(response: 0.4, dampingFraction: 0.6) : nil
     withAnimation(animation) {
       previewFrameAmount = previewFrameRatio * previewBoxingSize.largestSide
     }
   }
-  
+
   private func currentImageDidChanged(newImage: UIImage) {
     updateFrameAmount(
       selectedFrameAmount: selectedFrameAmount,
@@ -414,14 +417,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       animate: false
     )
   }
-  
+
   private func frameAmountDidChanged(newValue: Double) {
     updateFrameAmount(
       selectedFrameAmount: newValue,
       image: editingImages[currentImageIndex].image
     )
   }
-  
+
   private func frameSizeModeDidChanged() {
     selectedFrameAmount = minFrameAmount
     updateFrameAmount(
@@ -429,9 +432,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       image: editingImages[currentImageIndex].image
     )
   }
-  
+
   // MARK: - ACTIONS
-  
+
   private func loadThumbnails(ofSize size: CGSize) async {
     var newEditingImages = [EditingImage]()
     for image in _imagesToEdit {
@@ -442,23 +445,23 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
     self.editingImages = newEditingImages
   }
-  
+
   private func saveImages() {
     let isUserPro = proPlanService.currentStatus == .pro
     let hasUsedProFeatures = selectedFrameColorMode == .imageBlur
-    
+
     if !isUserPro && hasUsedProFeatures {
       showPaywall = true
       return
     }
-    
+
     processingState = .processing
-    
+
     Task {
       try? await Task.sleep(for: .seconds(0.5))
-      
+
       let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
-      
+
       switch status {
       case .authorized:
         let params = ImageSaverParameters(
@@ -477,21 +480,21 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             showExportFinishedAlert = true
           }
         }
-        
+
       case .limited, .notDetermined, .restricted, .denied:
         showNoPhotoAccessAlert = true
-        
+
       @unknown default: break
       }
     }
   }
-  
+
   private func finish() {
     closeAnimation {
       onCancel()
     }
   }
-  
+
   private func openPhotoApp() {
     closeAnimation {
       onCancel()
@@ -502,7 +505,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       }
     }
   }
-  
+
   private func closeAnimation(completion: @escaping () -> Void) {
     Task { @MainActor in
       self.isFinished = true
@@ -510,14 +513,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       completion()
     }
   }
-  
+
   private func goToAppPrivacySettings() {
     guard let url = URL(string: UIApplication.openSettingsURLString),
           UIApplication.shared.canOpenURL(url) else {
       assertionFailure("Not able to open App privacy settings")
       return
     }
-    
+
     UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
 }

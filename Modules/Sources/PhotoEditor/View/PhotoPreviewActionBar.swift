@@ -60,6 +60,7 @@ struct PhotoPreviewActionBar: View {
           ), lineWidth: 0.5)
       }
     )
+    .padding(.horizontal, 2)
   }
 
   private func showPreviousPhoto() {
