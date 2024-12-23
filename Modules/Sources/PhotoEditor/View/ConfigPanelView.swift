@@ -1,7 +1,13 @@
 import SwiftUI
+import Utils
 
 struct ConfigPanelView: View {
 
+  enum Position {
+    case open, wrapped
+  }
+
+  // MARK: Params
   @Binding var aspectRatioMode: AspectRatioMode
   @Binding var frameColor: Color
   @Binding var frameColorMode: FrameColorMode
@@ -11,10 +17,24 @@ struct ConfigPanelView: View {
   let maxFrameAmount: Double
   let isPro: Bool
 
+  // MARK: Frame Amount Input Alert
   @State private var showFrameAmountInputView = false
   @State private var frameAmountInputValue: Int? = nil
 
+  // MARK: Panel Drag Gesture
+  @State private var panelHeight: CGFloat = 0
   @State private var dragOffset: CGFloat = 0
+  @State private var positionOffset: CGFloat = 0
+  @State private var panelPosition: Position = .open
+  @State private var panelPositionDidChanged = false
+  private var dragLimitToPin: CGFloat {
+    switch panelPosition {
+    case .open: return panelHeight / 3
+    case .wrapped: return panelHeight / 4
+    }
+  }
+
+  // MARK: - Body
 
   var body: some View {
     VStack(spacing: 8) {
@@ -30,29 +50,61 @@ struct ConfigPanelView: View {
     .background(backgroundView)
     .padding(.horizontal, 2)
     .padding(.bottom, 2)
+    .background(heightReaderView)
     .gesture(
       DragGesture(minimumDistance: 1, coordinateSpace: .global)
         .onChanged { value in
+          HapticsEngine.shared.prepare()
           let translation = value.translation.height
-          if translation > 0 {
-            dragOffset = translation
-          } else {
-            let limit: CGFloat = 300
-            let xOff = value.translation.width
-            let yOff = value.translation.height
-            let dist = sqrt(xOff*xOff + yOff*yOff);
-            let factor = 1 / (dist / limit + 1)
-            dragOffset = value.translation.height * factor
+          dragOffset = calculateDragOffset(translation: value.translation)
+
+          switch panelPosition {
+          case .open:
+            if translation > 0 {
+              if dragOffset > dragLimitToPin {
+                panelPosition = .wrapped
+                panelPositionDidChanged = true
+              }
+            }
+          case .wrapped:
+            if translation < 0 {
+              if dragOffset < -dragLimitToPin {
+                panelPosition = .open
+                panelPositionDidChanged = true
+              }
+            }
           }
         }
         .onEnded { value in
+          if panelPositionDidChanged {
+            HapticsEngine.shared.selectionChanged()
+          }
+          panelPositionDidChanged = false
           withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
             dragOffset = 0
+            switch panelPosition {
+            case .open:
+              positionOffset = 0
+            case .wrapped:
+              positionOffset = panelHeight - panelHeight/3
+            }
           }
         }
     )
     .offset(y: dragOffset)
+    .offset(y: positionOffset)
   }
+
+  func calculateDragOffset(translation: CGSize) -> CGFloat {
+    let dragLimit: CGFloat = panelHeight
+    let xOff = translation.width
+    let yOff = translation.height
+    let dist = sqrt(xOff*xOff + yOff*yOff);
+    let factor = 1 / (dist / dragLimit + 1)
+    return translation.height * factor
+  }
+
+  // MARK: - Views
 
   private var backgroundView: some View {
     ZStack {
@@ -68,11 +120,25 @@ struct ConfigPanelView: View {
     }
   }
 
+  private var heightReaderView: some View {
+    GeometryReader { proxy in
+      Color.clear
+        .onAppear {
+          panelHeight = proxy.size.height
+        }
+        .onChange(of: proxy.size, initial: true) { _, newSize in
+          panelHeight = newSize.height
+        }
+    }
+  }
+
   private var grapIndicator: some View {
     Capsule(style: .continuous)
       .fill(.white.opacity(0.5))
       .frame(width: 28, height: 4)
   }
+
+  // MARK: Aspect Ratio
 
   private var aspectRationModeConfigItem: some View {
     HStack {
@@ -103,6 +169,8 @@ struct ConfigPanelView: View {
       }
     }
   }
+
+  // MARK: Frame Color
 
   private var frameColorConfigItem: some View {
     HStack {
@@ -160,6 +228,8 @@ struct ConfigPanelView: View {
     : mode.title
   }
 
+  // MARK: Frame Size Mode
+
   private var frameSizeModeConfigItem: some View {
     HStack {
       HStack {
@@ -190,6 +260,8 @@ struct ConfigPanelView: View {
       }
     }
   }
+
+  // MARK: Frame Size Amount
 
   private var frameAmountConfigItem: some View {
     VStack(spacing: 8) {
@@ -252,6 +324,8 @@ struct ConfigPanelView: View {
   }
 }
 
+// MARK: - Preview
+
 private struct PreviewView: View {
   @State private var selecteAspectRatioMode: AspectRatioMode = .square
   @State private var selectedFrameColor: Color = FrameColorMode.defaultColor
@@ -281,7 +355,6 @@ private struct PreviewView: View {
         isPro: false
       )
     }
-//    .border(.white.opacity(0.2), width: 1)
   }
 }
 
