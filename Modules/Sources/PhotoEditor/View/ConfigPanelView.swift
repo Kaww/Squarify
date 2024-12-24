@@ -54,39 +54,39 @@ struct ConfigPanelView: View {
     .gesture(
       DragGesture(minimumDistance: 1, coordinateSpace: .global)
         .onChanged { value in
+          // Updates dragOffset with rubber band feeling
           HapticsEngine.shared.prepare()
-          let translation = value.translation.height
           dragOffset = calculateDragOffset(translation: value.translation)
+        }
+        .onEnded { value in
+          // Change positionOffset depending on the end position
+          let currentDragOffset = calculateDragOffset(translation: value.translation)
+          var newPositionOffset: CGFloat? = nil
 
           switch panelPosition {
           case .open:
-            if translation > 0 {
-              if dragOffset > dragLimitToPin {
-                panelPosition = .wrapped
-                panelPositionDidChanged = true
-              }
+            if currentDragOffset > dragLimitToPin {
+              panelPosition = .wrapped
+              newPositionOffset = panelHeight - panelHeight/3
+              panelPositionDidChanged = true
             }
           case .wrapped:
-            if translation < 0 {
-              if dragOffset < -dragLimitToPin {
-                panelPosition = .open
-                panelPositionDidChanged = true
-              }
+            if currentDragOffset < -dragLimitToPin {
+              panelPosition = .open
+              newPositionOffset = 0
+              panelPositionDidChanged = true
             }
           }
-        }
-        .onEnded { value in
+
           if panelPositionDidChanged {
             HapticsEngine.shared.selectionChanged()
+            panelPositionDidChanged = false
           }
-          panelPositionDidChanged = false
+
           withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
             dragOffset = 0
-            switch panelPosition {
-            case .open:
-              positionOffset = 0
-            case .wrapped:
-              positionOffset = panelHeight - panelHeight/3
+            if let newPositionOffset {
+              positionOffset = newPositionOffset
             }
           }
         }
@@ -96,7 +96,7 @@ struct ConfigPanelView: View {
   }
 
   func calculateDragOffset(translation: CGSize) -> CGFloat {
-    let dragLimit: CGFloat = panelHeight
+    let dragLimit: CGFloat = panelHeight * 1.5
     let xOff = translation.width
     let yOff = translation.height
     let dist = sqrt(xOff*xOff + yOff*yOff);
