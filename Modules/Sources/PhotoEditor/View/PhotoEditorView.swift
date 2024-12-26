@@ -118,14 +118,17 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       Button("_go_to_privacy_app_settings".localized, action: goToAppPrivacySettings)
     }
     .preferredColorScheme(.dark)
+    .onChange(of: selectedAspectRatioMode) { oldValue, newValue in
+      aspectRatioModeDidChange()
+    }
     .onChange(of: currentImageIndex) { oldValue, newValue in
-      currentImageDidChanged(newImage: editingImages[newValue].image)
+      currentImageDidChange(newImage: editingImages[newValue].image)
     }
     .onChange(of: selectedFrameAmount) { oldValue, newValue in
-      frameAmountDidChanged(newValue: newValue)
+      frameAmountDidChange(newValue: newValue)
     }
     .onChange(of: selectedFrameSizeMode) { oldValue, newValue in
-      frameSizeModeDidChanged()
+      frameSizeModeDidChange()
     }
     .task {
       if AppStoreReview.canAsk() {
@@ -212,6 +215,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   @ViewBuilder
   private var loadedView: some View {
     photoFrameView(image: editingImages[currentImageIndex].thumbnail)
+      .animation(.spring(response: 0.4, dampingFraction: 0.6), value: selectedAspectRatioMode)
       .transition(loadedViewSpringTransition(delay: 0))
       .padding(.bottom, 8)
 
@@ -288,7 +292,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         .border(tooDarkImagePreviewBorder, width: 1)
         .animation(.linear(duration: 0.1), value: selectedFrameColor)
     }
-    .aspectRatio(contentMode: .fit)
+    .aspectRatio(selectedAspectRatioMode.ratio, contentMode: .fit)
     .clipped()
   }
 
@@ -400,20 +404,34 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     switch selectedFrameSizeMode {
     case .fixed:
       frameAmount = selectedFrameAmount
-
     case .proportional:
       frameAmount = selectedFrameAmount / 100 * imageLargestSide
     }
 
-    let previewFrameRatio = frameAmount / imageLargestSide
+    let ratio = selectedAspectRatioMode.ratio
+    let maxRatio = min(ratio, 1/ratio)
 
-    let animation = animate ? Animation.spring(response: 0.4, dampingFraction: 0.6) : nil
-    withAnimation(animation) {
-      previewFrameAmount = previewFrameRatio * previewBoxingSize.largestSide
+    let previewFrameRatio = frameAmount / imageLargestSide * maxRatio
+    let newPreviewFrameAmount = previewFrameRatio * previewBoxingSize.largestSide
+
+    if animate {
+      withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+        previewFrameAmount = newPreviewFrameAmount
+      }
+    } else {
+      previewFrameAmount = newPreviewFrameAmount
     }
   }
 
-  private func currentImageDidChanged(newImage: UIImage) {
+  private func aspectRatioModeDidChange() {
+    updateFrameAmount(
+      selectedFrameAmount: selectedFrameAmount,
+      image: editingImages[currentImageIndex].image,
+      animate: false
+    )
+  }
+
+  private func currentImageDidChange(newImage: UIImage) {
     updateFrameAmount(
       selectedFrameAmount: selectedFrameAmount,
       image: newImage,
@@ -421,14 +439,14 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     )
   }
 
-  private func frameAmountDidChanged(newValue: Double) {
+  private func frameAmountDidChange(newValue: Double) {
     updateFrameAmount(
       selectedFrameAmount: newValue,
       image: editingImages[currentImageIndex].image
     )
   }
 
-  private func frameSizeModeDidChanged() {
+  private func frameSizeModeDidChange() {
     selectedFrameAmount = minFrameAmount
     updateFrameAmount(
       selectedFrameAmount: selectedFrameAmount,
