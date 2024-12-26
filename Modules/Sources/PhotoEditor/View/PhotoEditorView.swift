@@ -83,14 +83,9 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   public var body: some View {
     NavigationStack {
-      VStack(spacing: 0) {
-        if isFinished {
-          Spacer()
-        } else if editingImages.isEmpty {
-          loadingView
-        } else {
-          loadedView
-        }
+      ZStack {
+        loadingView
+        loadedView
       }
       .toolbar { toolbarContent }
       .navigationBarTitleDisplayMode(.inline)
@@ -197,36 +192,45 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   // MARK: - VIEWS
 
+  @ViewBuilder
   private var loadingView: some View {
-    GeometryReader { proxy in
-      VStack {
-        Text("_loading_images_label".localized)
-        ProgressView()
-          .progressViewStyle(.circular)
-          .tint(.sunglow)
-          .controlSize(.large)
+    if !isFinished && editingImages.isEmpty {
+      GeometryReader { proxy in
+        VStack {
+          Text("_loading_images_label".localized)
+          ProgressView()
+            .progressViewStyle(.circular)
+            .tint(.sunglow)
+            .controlSize(.large)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task { await loadThumbnails(ofSize: proxy.size) }
       }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .task { await loadThumbnails(ofSize: proxy.size) }
+      .transition(.opacity.combined(with: .scale).animation(.spring))
     }
-    .transition(.opacity.combined(with: .scale).animation(.spring))
   }
 
   @ViewBuilder
   private var loadedView: some View {
-    photoFrameView(image: editingImages[currentImageIndex].thumbnail)
-      .animation(.spring(response: 0.4, dampingFraction: 0.6), value: selectedAspectRatioMode)
-      .transition(loadedViewSpringTransition(delay: 0))
-      .padding(.bottom, 8)
+    VStack(spacing: 0) {
+      if !editingImages.isEmpty && !isFinished {
+        photoFrameView(image: editingImages[currentImageIndex].thumbnail)
+          .transition(loadedViewSpringTransition(delay: 0))
+          .padding(.bottom, 8)
+      }
 
-    PhotoPreviewActionBar(
-      currentImageIndex: $currentImageIndex,
-      numberOfImages: editingImages.count,
-      currentImage: editingImages[currentImageIndex]
-    )
-    .transition(loadedViewSpringTransition(delay: 0.1))
+      if !editingImages.isEmpty && !isFinished {
+        PhotoPreviewActionBar(
+          currentImageIndex: $currentImageIndex,
+          numberOfImages: editingImages.count,
+          currentImage: editingImages[currentImageIndex]
+        )
+        .transition(loadedViewSpringTransition(delay: 0.1))
 
-    Spacer()
+        Spacer()
+      }
+    }
+    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: selectedAspectRatioMode)
   }
 
   @ViewBuilder
