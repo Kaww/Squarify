@@ -38,7 +38,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   @State private var selectedFrameColor: Color = FrameColorMode.defaultColor
   @State private var selectedFrameSizeMode: FrameSizeMode = .proportional
   @State private var selectedFrameAmount: Double = 0
-  @State private var previewFrameAmount: Double = 0
+  @State private var previewFramePaddingAmount: Double = 0
   @State private var previewBoxingSize: CGSize = .zero
 
   private let minFrameAmount: Double = 0
@@ -46,7 +46,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     switch selectedFrameSizeMode {
     case .fixed:
       let largestSize: Int = _imagesToEdit.reduce(into: 100, { partialResult, image in
-        let imageLargestSide = Int(image.size.largestSide)
+        let imageLargestSide = Int(image.size.touchingSideSize(forFrameAspectRatio: selectedAspectRatioMode))
         if partialResult < imageLargestSide {
           partialResult = imageLargestSide
         }
@@ -114,7 +114,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     }
     .preferredColorScheme(.dark)
     .onChange(of: selectedAspectRatioMode) { oldValue, newValue in
-      aspectRatioModeDidChange()
+      aspectRatioModeDidChange(newRatio: newValue)
     }
     .onChange(of: currentImageIndex) { oldValue, newValue in
       currentImageDidChange(newImage: editingImages[newValue].image)
@@ -289,10 +289,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
           Image(uiImage: image)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .padding(previewFrameAmount)
-            .onAppear { previewBoxingSize = proxy.size }
-            .onChange(of: proxy.size) { previewBoxingSize = $1 }
+            .padding(selectedAspectRatioMode.previewPaddingInsets(
+              forImageSize: image.size,
+              paddingAmount: previewFramePaddingAmount
+            ))
         }
+        .onAppear { previewBoxingSize = proxy.size }
+        .onChange(of: proxy.size) { previewBoxingSize = $1 }
         .border(tooDarkImagePreviewBorder, width: 1)
         .animation(.linear(duration: 0.1), value: selectedFrameColor)
     }
@@ -397,46 +400,52 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   // MARK: - FRAME CALCULATIONS
 
-  private func updateFrameAmount(
+  private func calculatePreviewFramePadding(
+    selectedAspectRatio: AspectRatioMode,
     selectedFrameAmount: Double,
     image: UIImage,
     animate: Bool = true
   ) {
-    let imageLargestSide = image.size.largestSide
-    let frameAmount: Double
-
+    // Calculate raw frame amount
+    let imageTouchingSideSize = image.size.touchingSideSize(forFrameAspectRatio: selectedAspectRatioMode)
+    let rawFrameAmount: CGFloat
     switch selectedFrameSizeMode {
     case .fixed:
-      frameAmount = selectedFrameAmount
+      rawFrameAmount = selectedFrameAmount
     case .proportional:
-      frameAmount = selectedFrameAmount / 100 * imageLargestSide
+      rawFrameAmount = selectedFrameAmount / 100 * imageTouchingSideSize
     }
 
-    let ratio = selectedAspectRatioMode.ratio
-    let maxRatio = min(ratio, 1/ratio)
+    // Calculate preview padding
+    let paddingRatio = rawFrameAmount / imageTouchingSideSize
+    let previewTouchingSideSize = previewBoxingSize.touchingSideSize(insideImageSize: image.size)
+    let newPreviewFramePaddingAmount = previewTouchingSideSize * paddingRatio
 
-    let previewFrameRatio = frameAmount / imageLargestSide * maxRatio
-    let newPreviewFrameAmount = previewFrameRatio * previewBoxingSize.largestSide
-
+    // Updates with animation
     if animate {
       withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-        previewFrameAmount = newPreviewFrameAmount
+        previewFramePaddingAmount = newPreviewFramePaddingAmount
       }
     } else {
-      previewFrameAmount = newPreviewFrameAmount
+      previewFramePaddingAmount = newPreviewFramePaddingAmount
     }
   }
 
-  private func aspectRatioModeDidChange() {
-    updateFrameAmount(
-      selectedFrameAmount: selectedFrameAmount,
-      image: editingImages[currentImageIndex].image,
-      animate: false
-    )
+  private func aspectRatioModeDidChange(newRatio: AspectRatioMode) {
+    Task { @MainActor in
+      try? await Task.sleep(for: .seconds(0.1))
+      calculatePreviewFramePadding(
+        selectedAspectRatio: newRatio,
+        selectedFrameAmount: selectedFrameAmount,
+        image: editingImages[currentImageIndex].image,
+        animate: false
+      )
+    }
   }
 
   private func currentImageDidChange(newImage: UIImage) {
-    updateFrameAmount(
+    calculatePreviewFramePadding(
+      selectedAspectRatio: selectedAspectRatioMode,
       selectedFrameAmount: selectedFrameAmount,
       image: newImage,
       animate: false
@@ -444,7 +453,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   }
 
   private func frameAmountDidChange(newValue: Double) {
-    updateFrameAmount(
+    calculatePreviewFramePadding(
+      selectedAspectRatio: selectedAspectRatioMode,
       selectedFrameAmount: newValue,
       image: editingImages[currentImageIndex].image
     )
@@ -452,7 +462,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   private func frameSizeModeDidChange() {
     selectedFrameAmount = minFrameAmount
-    updateFrameAmount(
+    calculatePreviewFramePadding(
+      selectedAspectRatio: selectedAspectRatioMode,
       selectedFrameAmount: selectedFrameAmount,
       image: editingImages[currentImageIndex].image
     )
