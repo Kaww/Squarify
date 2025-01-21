@@ -1,12 +1,6 @@
 import Foundation
 import SwiftUI
 
-extension CGSize {
-  var isPortrait: Bool {
-    height >= width
-  }
-}
-
 enum AspectRatioMode: CaseIterable, Hashable, Identifiable {
   case square
   case instaPortrait
@@ -57,12 +51,42 @@ enum AspectRatioMode: CaseIterable, Hashable, Identifiable {
     forImageSize imageSize: CGSize,
     paddingAmount: CGFloat
   ) -> EdgeInsets {
-    let side = imageSize.touchingSides(forFrameAspectRatio: self)
-    switch side {
+    let touchingSides = imageSize.touchingSides(forFrameAspectRatio: self)
+
+    switch touchingSides {
     case .vertical:
-      return EdgeInsets(top: paddingAmount, leading: 0, bottom: paddingAmount, trailing: 0)
+      return EdgeInsets(
+        top: paddingAmount,
+        leading: 0,
+        bottom: paddingAmount,
+        trailing: 0
+      )
     case .horizontal:
-      return EdgeInsets(top: 0, leading: paddingAmount, bottom: 0, trailing: paddingAmount)
+      return EdgeInsets(
+        top: 0,
+        leading: paddingAmount,
+        bottom: 0,
+        trailing: paddingAmount
+      )
+    }
+  }
+
+  /// Minimal size of the required canvas to fit `imageSize` into the current aspect ratio
+  func canvasSizeFor(imageSize size: CGSize) -> CGSize {
+    let touchingSides = size.touchingSides(forFrameAspectRatio: self)
+
+    switch touchingSides {
+    case .vertical:
+      return CGSize(
+        width: size.height * ratio,
+        height: size.height
+      )
+
+    case .horizontal:
+      return CGSize(
+        width: size.width,
+        height: size.width * 1 / ratio
+      )
     }
   }
 }

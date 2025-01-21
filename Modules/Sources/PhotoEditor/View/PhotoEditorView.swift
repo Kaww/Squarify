@@ -69,7 +69,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   public init(
     imagesToEdit: [UIImage],
-    imageSaver: Saver,
+    imageSaver: Saver, // TODO: any
     thumbnailLoader: any ThumbnailLoader,
     onCancel: @escaping () -> Void
   ) {
@@ -226,6 +226,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
           currentImage: editingImages[currentImageIndex]
         )
         .transition(loadedViewSpringTransition(delay: 0.1))
+        .disabled(processingState == .processing)
 
         Spacer()
       }
@@ -406,20 +407,22 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     image: UIImage,
     animate: Bool = true
   ) {
+    // Get canvas witdh
+    let canvasSize = selectedAspectRatio.canvasSizeFor(imageSize: image.size)
+    let canvasWidth = canvasSize.width
+
     // Calculate raw frame amount
-    let imageTouchingSideSize = image.size.touchingSideSize(forFrameAspectRatio: selectedAspectRatioMode)
     let rawFrameAmount: CGFloat
     switch selectedFrameSizeMode {
     case .fixed:
       rawFrameAmount = selectedFrameAmount
     case .proportional:
-      rawFrameAmount = selectedFrameAmount / 100 * imageTouchingSideSize
+      rawFrameAmount = selectedFrameAmount / 100 * canvasWidth
     }
 
     // Calculate preview padding
-    let paddingRatio = rawFrameAmount / imageTouchingSideSize
-    let previewTouchingSideSize = previewBoxingSize.touchingSideSize(insideImageSize: image.size)
-    let newPreviewFramePaddingAmount = previewTouchingSideSize * paddingRatio
+    let paddingRatio = rawFrameAmount / canvasWidth
+    let newPreviewFramePaddingAmount = previewBoxingSize.width * paddingRatio
 
     // Updates with animation
     if animate {
@@ -502,6 +505,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       case .authorized:
         let params = ImageSaverParameters(
           images: editingImages.map(\.image),
+          aspectRatio: selectedAspectRatioMode,
           frameAmount: selectedFrameAmount,
           frameSizeMode: selectedFrameSizeMode,
           frameColorMode: selectedFrameColorMode,
@@ -514,6 +518,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             try? await Task.sleep(for: .seconds(0.8))
             processingState = .idle
             showExportFinishedAlert = true
+            imageSaver.resetState()
           }
         }
 

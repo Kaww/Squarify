@@ -3,123 +3,131 @@ import UIKit
 
 /// Source: [Medium post](https://medium.com/the-traveled-ios-developers-guide/uigraphicsimagerenderer-fe40edc3a464).
 public class DefaultImageSaver: NSObject, ImageSaver {
-  
-  private struct ImageRenderingInfos {
-    let size: CGSize
-    let frameWidth: CGFloat
-    
-    var imageSizeWithinFrame: CGSize {
-      .init(
-        width: size.width - 2 * frameWidth,
-        height: size.height - 2 * frameWidth
-      )
-    }
-  }
-  
+
   @Published public var numberOfSavedImages: Int = 0
-  
+
   public func save(withParams params: ImageSaverParameters, completion: @escaping () -> Void) {
     Task {
       for image in params.images {
         autoreleasepool {
-          saveV3(
+          saveV4(
             image,
+            aspectRatio: params.aspectRatio,
             frameAmount: params.frameAmount,
             frameSizeMode: params.frameSizeMode,
             frameColorMode: params.frameColorMode,
             frameColor: params.frameColor
           )
         }
-        try? await Task.sleep(for: .seconds(0.5)) // TODO: Adapt sleep to each image size
+        try? await Task.sleep(for: .seconds(0.5))
       }
       await MainActor.run {
         completion()
       }
     }
   }
-  
-  private func saveV3(
+
+  public func resetState() {
+    numberOfSavedImages = 0
+  }
+
+  // MARK: Save V4
+
+  private func saveV4(
     _ sourceImage: UIImage,
+    aspectRatio: AspectRatioMode,
     frameAmount: CGFloat,
     frameSizeMode: FrameSizeMode,
     frameColorMode: FrameColorMode,
     frameColor: UIColor
   ) {
-    // Calculate frame size
-    let frameWidth: CGFloat
-    
+    // Get canvas size
+    let sourceImgSize = sourceImage.size
+    let canvasSize = aspectRatio.canvasSizeFor(imageSize: sourceImgSize)
+    let canvasWidth = canvasSize.width
+
+    // Calculate raw frame amount
+    let rawFrameAmount: CGFloat
     switch frameSizeMode {
     case .fixed:
-      frameWidth = frameAmount
-      
+      rawFrameAmount = frameAmount
     case .proportional:
-      frameWidth = frameAmount / 100 * sourceImage.size.largestSide
+      rawFrameAmount = frameAmount / 100 * canvasWidth
     }
-    
-    // Setup rendering infos
-    let renderingInfos = ImageRenderingInfos(
-      size: CGSize(
-        width: sourceImage.size.largestSide,
-        height: sourceImage.size.largestSide
-      ),
-      frameWidth: frameWidth
+
+    // Apply borders insets to image
+    let imageTouchingSides = sourceImgSize.touchingSides(forFrameAspectRatio: aspectRatio)
+    let insettedImageSize: CGSize
+    switch imageTouchingSides {
+    case .vertical:
+      let h1 = sourceImgSize.height
+      let h2 = h1 - 2 * rawFrameAmount
+      let w1 = sourceImgSize.width
+      let w2 = w1 * h2 / h1
+      insettedImageSize = CGSize(width: w2, height: h2)
+
+    case .horizontal:
+      let w1 = sourceImgSize.width
+      let w2 = w1 - 2 * rawFrameAmount
+      let h1 = sourceImgSize.height
+      let h2 = h1 * w2 / w1
+      insettedImageSize = CGSize(width: w2, height: h2)
+    }
+
+    // Calculate image position
+    let renderingData = (
+      canvasRect: CGRect(x: 0, y: 0, width: canvasSize.width, height: canvasSize.height),
+      imageRect: CGRect(
+        x: canvasSize.width / 2 - insettedImageSize.width / 2,
+        y: canvasSize.height / 2 - insettedImageSize.height / 2,
+        width: insettedImageSize.width,
+        height: insettedImageSize.height
+      )
     )
-    let finalImageSize = renderingInfos.size
-    
-    // Image scaling calculations
-    let targetImageSize = renderingInfos.imageSizeWithinFrame
-    let widthRatio = targetImageSize.width / sourceImage.size.width
-    let heightRatio = targetImageSize.height / sourceImage.size.height
-    
-    let scaleFactor = min(widthRatio, heightRatio)
-    let scaledImageSize = CGSize(
-      width: sourceImage.size.width * scaleFactor,
-      height: sourceImage.size.height * scaleFactor
-    )
-    
-    // Start rendering
+
+    // Prepare rendering
     let format = UIGraphicsImageRendererFormat()
     format.scale = 1
-    let renderer = UIGraphicsImageRenderer(size: renderingInfos.size, format: format)
-    
-    let finalImage = renderer.image { context in
-      
-      let finalImageRect = CGRect(x: 0, y: 0, width: finalImageSize.width, height: finalImageSize.width)
-      
-      // Write background
+    let renderer = UIGraphicsImageRenderer(
+      size: canvasSize.rounded,
+      format: format
+    )
+
+    // Rendering
+    let renderedImage = renderer.image { context in
+
+      // Draw background
+      let canvasRect = renderingData.canvasRect.rounded()
+
       switch frameColorMode {
       case .color:
         frameColor.setFill()
-        context.fill(finalImageRect)
-        
+        context.fill(canvasRect)
+
       case .imageBlur:
         UIColor.white.setFill()
-        context.fill(finalImageRect)
-        
+        context.fill(canvasRect)
+
         let blurAmount = FrameColorMode.blurAmountFor(photoSize: sourceImage.size)
         let enlargedRect = FrameColorMode
           .blurEnlargedSize(photoSize: sourceImage.size)
-          .centered(with: finalImageRect)
+          .centered(with: canvasRect)
           .rounded()
-        
+
         sourceImage
           .blurred(amount: blurAmount)
           .draw(in: enlargedRect)
       }
-      
-      // Write image
-      let imageRect = CGRect(
-        x: (finalImageSize.width - scaledImageSize.width) / 2,
-        y: (finalImageSize.height - scaledImageSize.height) / 2,
-        width: scaledImageSize.width,
-        height: scaledImageSize.height
-      ).rounded()
+
+      // Draw image
+      let imageRect = renderingData.imageRect.rounded()
       sourceImage.draw(in: imageRect)
     }
-    
-    UIImageWriteToSavedPhotosAlbum(finalImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+
+    // Save image
+    UIImageWriteToSavedPhotosAlbum(renderedImage, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
   }
-  
+
   @objc
   private func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
     Task { @MainActor in

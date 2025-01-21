@@ -38,49 +38,6 @@ extension CGSize {
     }
   }
 
-  /// Touching side of frame for a given inside image size.
-  func touchingSides(insideImageSize imageSize: CGSize) -> TouchingSide {
-    let frameRatio = width / height
-    let ri = imageSize.width / imageSize.height
-
-    switch frameRatio {
-    case let rf where ri < rf:
-      return .vertical
-
-    case let rf where ri > rf:
-      return .horizontal
-
-    default: // ri == rf
-      if frameRatio < 1 {
-        // frame is portrait
-        return .vertical
-      } else {
-        // frame is landscape
-        return .horizontal
-      }
-    }
-  }
-
-  /// Touching side SIZE of frame for a given inside image size.
-  func touchingSideSize(insideImageSize imageSize: CGSize) -> CGFloat {
-    switch touchingSides(insideImageSize: imageSize) {
-    case .vertical:
-      return height
-
-    case .horizontal:
-      return width
-    }
-  }
-
-  @available(*, deprecated, renamed: "touchingSideSize", message: "Use touchingSideSize(forFrameAspectRatio:)")
-  var largestSide: CGFloat {
-    width > height ? width : height
-  }
-
-  var smallestSide: CGFloat {
-    width < height ? width : height
-  }
-
   func centered(with rect: CGRect) -> CGRect {
     .init(
       x: (rect.width - width) / 2,
@@ -88,6 +45,14 @@ extension CGSize {
       width: width,
       height: height
     )
+  }
+
+  private var largestSide: CGFloat {
+    width > height ? width : height
+  }
+
+  var smallestSide: CGFloat {
+    width < height ? width : height
   }
 
   func zoomedToLargedSide() -> CGSize {
@@ -100,5 +65,16 @@ extension CGSize {
 
   func enlargedBy(_ value: CGFloat) -> CGSize {
     .init(width: width + value, height: height + value)
+  }
+
+  var isPortrait: Bool {
+    height >= width
+  }
+
+  var rounded: CGSize {
+    CGSize(
+      width: width.rounded(),
+      height: height.rounded()
+    )
   }
 }
