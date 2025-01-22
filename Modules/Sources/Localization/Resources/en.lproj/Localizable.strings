@@ -2,11 +2,11 @@
 
 "_aspect_ratio_mode_picker_label" = "Aspect Ratio";
 "_aspect_ratio_title_square" = "Square";
-"_aspect_ratio_title_instaPortrait" = "Insta Portrait";
-"_aspect_ratio_title_instaLandscape" = "Insta Landscape";
+"_aspect_ratio_title_instaPortrait" = "Portrait";
+"_aspect_ratio_title_instaLandscape" = "Landscape";
 
-"_fixed_frame_size_mode_title" = "Fixed";
-"_proportional_frame_size_mode_title" = "Proportional";
+"_fixed_frame_size_mode_title" = "Fixed amount";
+"_proportional_frame_size_mode_title" = "Percentage";
 
 "_exporting_label" = "Exporting... %@ / %@";
 "_export_all_photos_label" = "Export all photos";
@@ -23,7 +23,7 @@
 "_photos_saved_in_gallery_message" = "Photos have been saved in your Photos app!";
 "_image_x_of_y_label" = "Image %@/%@";
 "_boder_color_picker_label" = "Style";
-"_frame_size_mode_label" = "Frame Size Mode";
+"_frame_size_mode_label" = "Frame Sizing";
 "_mode_picker_label" = "Mode";
 "_frame_amount_label" = "Frame Amount";
 "_frame_amount_placeholder" = "Ex: 200";

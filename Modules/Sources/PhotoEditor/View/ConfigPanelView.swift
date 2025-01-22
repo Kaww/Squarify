@@ -154,21 +154,28 @@ struct ConfigPanelView: View {
         Picker("_mode_picker_label".localized, selection: $aspectRatioMode) {
           ForEach(AspectRatioMode.allCases) { mode in
             Label(
-              title: { Text(mode.title) },
+              title: { Text(aspectRatioLabelTitle(mode: mode)) },
               icon: { mode.icon }
             )
             .tag(mode)
           }
         }
       } label: {
-        Text(aspectRatioMode.title)
+        Text(aspectRatioLabelTitle(mode: aspectRatioMode))
           .font(.system(size: 16, weight: .medium, design: .rounded))
           .configPickerLabelStyle()
-          .frame(width: 150, alignment: .trailing)
+          .frame(width: 165, alignment: .trailing)
           .animation(.spring(duration: 0.3), value: aspectRatioMode)
       }
     }
   }
+
+  private func aspectRatioLabelTitle(mode: AspectRatioMode) -> String {
+    mode != .square && !isPro
+    ? mode.title + " (⭑ Pro)"
+    : mode.title
+  }
+
 
   // MARK: Frame Color
 
@@ -224,7 +231,7 @@ struct ConfigPanelView: View {
 
   private func frameColorModeLabelTitle(mode: FrameColorMode) -> String {
     mode == .imageBlur && !isPro
-    ? mode.title + " (pro)"
+    ? mode.title + " (⭑ Pro)"
     : mode.title
   }
 
@@ -255,7 +262,7 @@ struct ConfigPanelView: View {
         Text(frameSizeMode.title)
           .font(.system(size: 16, weight: .medium, design: .rounded))
           .configPickerLabelStyle()
-          .frame(width: 120, alignment: .trailing)
+          .frame(width: 130, alignment: .trailing)
           .animation(.spring(duration: 0.3), value: frameSizeMode)
       }
     }

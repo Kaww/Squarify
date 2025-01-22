@@ -373,6 +373,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
             .animation(.default, value: imageSaver.numberOfSavedImages)
             .font(.system(size: 20, weight: .semibold, design: .default))
             .monospacedDigit()
+            .multilineTextAlignment(.center)
 
             Text("_photos_are_saved_in_gallery_message".localized)
               .font(.system(size: 12, weight: .regular))
@@ -487,7 +488,10 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
 
   private func saveImages() {
     let isUserPro = proPlanService.currentStatus == .pro
-    let hasUsedProFeatures = selectedFrameColorMode == .imageBlur
+
+    let hasUsedProRatios = selectedAspectRatioMode != .square
+    let hasUsedBlur = selectedFrameColorMode == .imageBlur
+    let hasUsedProFeatures = hasUsedBlur || hasUsedProRatios
 
     if !isUserPro && hasUsedProFeatures {
       showPaywall = true
