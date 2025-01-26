@@ -56,9 +56,10 @@
 "_thanks_for_pro_plan" = "♥️ Merci pour votre achat de Shoplist Pro !";
 "_your_pro_plan_benefits" = "Vos avantages Pro";
 
-"_pro_benefit_blur_border" = "Bordures avec effet flouté";
-"_pro_benefit_app_icons" = "Icône d'app pro";
-"_pro_benefit_future_features" = "Fonctionnalités avancées à venir";
+"_pro_benefit_blur_border" = "Bordures *blur*";
+"_pro_benefit_aspect_ratios" = "Choix de l'aspect ratio";
+"_pro_benefit_app_icons" = "Icône d'app personnalisable";
+"_pro_benefit_future_features" = "Fonctionnalités à venir...";
 
 "_app_icons" = "Icônes de l'app";
 "_app_icon_default" = "Icône par défaut";

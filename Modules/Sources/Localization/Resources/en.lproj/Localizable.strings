@@ -57,8 +57,9 @@
 "_your_pro_plan_benefits" = "Your Pro benefits";
 
 "_pro_benefit_blur_border" = "Blur borders";
-"_pro_benefit_app_icons" = "Pro app icons";
-"_pro_benefit_future_features" = "Future features";
+"_pro_benefit_aspect_ratios" = "Aspect ratios choice";
+"_pro_benefit_app_icons" = "Custom app icons";
+"_pro_benefit_future_features" = "Next features...";
 
 "_app_icons" = "App icons";
 "_app_icon_default" = "Default";

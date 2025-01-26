@@ -149,16 +149,14 @@ struct SettingsView: View {
           }
         }
 
-        if isPro {
-          Button(action: { showAppIconsPicker = true }) {
-            HStack {
-              itemImage(Image(systemName: "app.badge.fill"), color: .black)
-              Text("_app_icons".localized)
-                .foregroundColor(.neutral0)
-            }
+        Button(action: { showAppIconsPicker = true }) {
+          HStack {
+            itemImage(Image(systemName: "app.badge.fill"), color: .black)
+            Text("_app_icons".localized)
+              .foregroundColor(.neutral0)
           }
-          .popover(isPresented: $showAppIconsPicker) { AppIconsPickerView() }
         }
+        .popover(isPresented: $showAppIconsPicker) { AppIconsPickerView() }
       },
       header: {
         Text("_squarify_pro".localized)
@@ -190,16 +188,20 @@ struct SettingsView: View {
       Text("✅ " + "_pro_benefit_blur_border".localized)
         .font(.system(size: 16, weight: .medium, design: .rounded))
       Spacer()
+      Text("✅ " + "_pro_benefit_aspect_ratios".localized)
+        .font(.system(size: 16, weight: .medium, design: .rounded))
+      Spacer()
       Text("✅ " + "_pro_benefit_app_icons".localized)
         .font(.system(size: 16, weight: .medium, design: .rounded))
       Spacer()
       Text("✅ " + "_pro_benefit_future_features".localized)
         .font(.system(size: 16, weight: .medium, design: .rounded))
+      Spacer()
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 20)
     .padding(.vertical)
-    .presentationDetents([.fraction(1.0/4.0)])
+    .presentationDetents([.fraction(1.0/3.0)])
     .presentationCornerRadius(50)
     .presentationDragIndicator(.visible)
   }

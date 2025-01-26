@@ -1,51 +1,52 @@
 import Foundation
 import SwiftUI
 import Utils
+import RevenueCat
+import RevenueCatUI
+import ConfettiSwiftUI
 
-enum AppIcons: String, CaseIterable, Identifiable {
-  case squarify = "AppIcon"
-  case squarifyPro = "AppIconPro"
+/// App Icons that user can choose
+///
+/// App Icons are stored in app's Asset Catalog
+/// - `rawValue` defines the icon's name as it is in the app's Asset Catalog
+/// - `displayTitle` defines a title to be displayed to describe the icon
+/// - `image` loads an `Image` from the module's Asset Catalog
+enum AppIcon: String, CaseIterable, Identifiable {
+  case `default` = "AppIcon"
+  case insta = "insta"
+  case green = "green"
+  case pink = "pink"
+  case multi = "multi"
 
   var id: String { rawValue }
 
-  var iconName: String? {
+  var displayTitle: String {
     switch self {
-    case .squarify:
-      return nil
-
-    default:
-      return rawValue
-    }
-  }
-
-  var title: String {
-    switch self {
-    case .squarify:
+    case .default:
       "_app_icon_default".localized
-
-    case .squarifyPro:
-      "_app_icon_pro".localized
-    }
-  }
-
-  var filename: String {
-    switch self {
-    case .squarify:
-      return "icon-1"
-
-    case .squarifyPro:
-      return "icon-pro"
+    case .insta:
+      "Insta"
+    case .green:
+      "Green"
+    case .pink:
+      "Pink"
+    case .multi:
+      "Multi"
     }
   }
 
   var image: Image {
-    Image(self.filename, bundle: .module)
+    Image(self.rawValue, bundle: .module)
   }
 }
 
 struct AppIconsPickerView: View {
 
+  @Environment(ProPlanService.self) private var proPlanService
+
   @State private var currentIconName: String? = ""
+  @State private var showPaywall = false
+  @State private var confettiCannonTrigger: Int = 0
 
   var body: some View {
     VStack(alignment: .leading) {
@@ -53,65 +54,93 @@ struct AppIconsPickerView: View {
         .font(.system(size: 30, weight: .black))
         .padding(.top)
 
-      Spacer()
+      ScrollView {
+        ForEach(AppIcon.allCases) { icon in
+          Button(action: { switchTo(icon) }) {
+            HStack(spacing: 16) {
+              icon.image
+                .resizable()
+                .frame(width: 80, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 20.0, style: .continuous))
+                .shadow(radius: 10)
 
-      ForEach(AppIcons.allCases) { icon in
-        Button(action: { switchTo(iconName: icon.iconName) }) {
-          HStack(spacing: 10) {
-            icon.image
-              .resizable()
-              .frame(width: 80, height: 80)
-              .clipShape(RoundedRectangle(cornerRadius: 20.0, style: .continuous))
-              .shadow(radius: 10)
+              Text(icon.displayTitle)
+                .font(.system(size: 20, weight: .medium, design: .rounded))
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(icon.title)
-              .font(.system(size: 20, weight: .medium, design: .rounded))
-              .frame(maxWidth: .infinity, alignment: .leading)
-
-            Image(systemName: "checkmark.circle.fill")
-              .font(.system(size: 25, weight: .bold, design: .rounded))
-              .foregroundStyle(.green)
-              .background(
-                Circle()
-                  .foregroundStyle(Color.white)
-                  .frame(width: 22, height: 22)
-              )
-              .scaleEffect(isCurrentIcon(icon.iconName) ? 1 : 0)
-              .opacity(isCurrentIcon(icon.iconName) ? 1 : 0)
-              .padding(.leading, 20)
+              Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 25, weight: .bold, design: .rounded))
+                .foregroundStyle(.green)
+                .background(
+                  Circle()
+                    .foregroundStyle(Color.white)
+                    .frame(width: 22, height: 22)
+                )
+                .scaleEffect(isCurrent(icon) ? 1 : 0)
+                .opacity(isCurrent(icon) ? 1 : 0)
+                .padding(.leading, 20)
+            }
+            .animation(.spring(duration: 0.4), value: currentIconName)
+            .padding(10)
+            .background(
+              RoundedRectangle(cornerRadius: 25, style: .continuous)
+                .foregroundStyle(.gray.opacity(0.2))
+            )
           }
-          .animation(.spring(duration: 0.4), value: currentIconName)
-          .padding(10)
-          .background(
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
-              .foregroundStyle(.gray.opacity(0.2))
-          )
+          .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
       }
-
-      Spacer()
     }
     .padding(.horizontal, 20)
     .padding(.vertical)
     .frame(maxWidth: .infinity, alignment: .leading)
-    .presentationDetents([.fraction(1/2)])
     .presentationCornerRadius(50)
     .presentationDragIndicator(.visible)
     .onAppear {
       currentIconName = UIApplication.shared.alternateIconName
     }
+    .sheet(isPresented: $showPaywall) {
+      PaywallView()
+        .onPurchaseCompleted { _ in
+          showPaywall = false
+          confettiCannonTrigger += 1
+          proPlanService.refresh()
+        }
+        .onRestoreCompleted { _ in
+          showPaywall = false
+          confettiCannonTrigger += 1
+          proPlanService.refresh()
+        }
+    }
+    .confettiCannon(
+      counter: $confettiCannonTrigger,
+      num: 50,
+      confettiSize: 15,
+      radius: UIScreen.main.bounds.height * 3/4,
+      repetitions: 2,
+      repetitionInterval: 1
+    )
   }
 
-  func isCurrentIcon(_ iconName: String?) -> Bool {
-    iconName == currentIconName
+  func isCurrent(_ icon: AppIcon) -> Bool {
+    let iconName: String? = icon == .default ? nil : icon.rawValue
+    return iconName == currentIconName
   }
 
-  private func switchTo(iconName: String?) {
+  private func switchTo(_ icon: AppIcon) {
+    guard proPlanService.currentStatus == .pro else {
+      showPaywall = true
+      return
+    }
+
+    let iconName: String? = icon == .default ? nil : icon.rawValue
+
     guard
       UIApplication.shared.supportsAlternateIcons,
       UIApplication.shared.alternateIconName != iconName
-    else { return }
+    else {
+      return
+    }
 
     UIApplication.shared.setAlternateIconName(iconName) { error in
       if let error = error {
