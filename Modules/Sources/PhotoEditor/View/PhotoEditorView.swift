@@ -410,7 +410,13 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   ) {
     // Get canvas witdh
     let canvasSize = selectedAspectRatio.canvasSizeFor(imageSize: image.size)
-    let canvasWidth = canvasSize.width
+    let canvasSizeValue: CGFloat
+    switch selectedAspectRatio {
+    case .square, .instaPortrait:
+      canvasSizeValue = canvasSize.width
+    case .instaLandscape:
+      canvasSizeValue = canvasSize.height
+    }
 
     // Calculate raw frame amount
     let rawFrameAmount: CGFloat
@@ -418,12 +424,20 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     case .fixed:
       rawFrameAmount = selectedFrameAmount
     case .proportional:
-      rawFrameAmount = selectedFrameAmount / 100 * canvasWidth
+      rawFrameAmount = selectedFrameAmount / 100 * canvasSizeValue
     }
 
     // Calculate preview padding
-    let paddingRatio = rawFrameAmount / canvasWidth
-    let newPreviewFramePaddingAmount = previewBoxingSize.width * paddingRatio
+    let previewSizeValue: CGFloat
+    switch selectedAspectRatio {
+    case .square, .instaPortrait:
+      previewSizeValue = previewBoxingSize.width
+    case .instaLandscape:
+      previewSizeValue = previewBoxingSize.height
+    }
+
+    let paddingRatio = rawFrameAmount / canvasSizeValue
+    let newPreviewFramePaddingAmount = previewSizeValue * paddingRatio
 
     // Updates with animation
     if animate {
@@ -442,7 +456,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         selectedAspectRatio: newRatio,
         selectedFrameAmount: selectedFrameAmount,
         image: editingImages[currentImageIndex].image,
-        animate: false
+        animate: true
       )
     }
   }

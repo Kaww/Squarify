@@ -44,7 +44,13 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     // Get canvas size
     let sourceImgSize = sourceImage.size
     let canvasSize = aspectRatio.canvasSizeFor(imageSize: sourceImgSize)
-    let canvasWidth = canvasSize.width
+    let canvasSizeValue: CGFloat
+    switch aspectRatio {
+    case .square, .instaPortrait:
+      canvasSizeValue = canvasSize.width
+    case .instaLandscape:
+      canvasSizeValue = canvasSize.height
+    }
 
     // Calculate raw frame amount
     let rawFrameAmount: CGFloat
@@ -52,7 +58,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     case .fixed:
       rawFrameAmount = frameAmount
     case .proportional:
-      rawFrameAmount = frameAmount / 100 * canvasWidth
+      rawFrameAmount = frameAmount / 100 * canvasSizeValue
     }
 
     // Apply borders insets to image
