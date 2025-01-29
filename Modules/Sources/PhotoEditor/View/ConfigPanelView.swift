@@ -51,6 +51,7 @@ struct ConfigPanelView: View {
     .padding(.horizontal, 2)
     .padding(.bottom, 2)
     .background(heightReaderView)
+    .frame(maxWidth: 600)
     .gesture(
       DragGesture(minimumDistance: 1, coordinateSpace: .global)
         .onChanged { value in

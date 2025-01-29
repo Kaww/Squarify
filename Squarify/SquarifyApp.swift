@@ -3,9 +3,9 @@ import BaseApp
 
 @main
 struct SquarifyApp: App {
-    var body: some Scene {
-        WindowGroup {
-            AppView()
-        }
+  var body: some Scene {
+    WindowGroup {
+      AppView()
     }
+  }
 }

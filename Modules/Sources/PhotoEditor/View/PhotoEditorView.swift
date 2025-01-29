@@ -39,6 +39,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
   @State private var selectedFrameSizeMode: FrameSizeMode = .proportional
   @State private var selectedFrameAmount: Double = 0
   @State private var previewFramePaddingAmount: Double = 0
+  @State private var rawFrameAmount: CGFloat = 0
   @State private var previewBoxingSize: CGSize = .zero
 
   private let minFrameAmount: Double = 0
@@ -89,9 +90,11 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       }
       .toolbar { toolbarContent }
       .navigationBarTitleDisplayMode(.inline)
-      .ignoresSafeArea(.keyboard)
     }
-    .overlay(alignment: .bottom) { configPanelView }
+    .overlay(alignment: .bottom) {
+      configPanelView
+    }
+    .ignoresSafeArea(.keyboard, edges: .all)
     .overlay { processingExportOverlay }
     .alert(
       exportFinishedTitleText,
@@ -223,7 +226,8 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
         PhotoPreviewActionBar(
           currentImageIndex: $currentImageIndex,
           numberOfImages: editingImages.count,
-          currentImage: editingImages[currentImageIndex]
+          imageExportSize: selectedAspectRatioMode.canvasSizeFor(imageSize: editingImages[currentImageIndex].image.size),
+          borderAmount: Int(rawFrameAmount)
         )
         .transition(loadedViewSpringTransition(delay: 0.1))
         .disabled(processingState == .processing)
@@ -408,7 +412,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     image: UIImage,
     animate: Bool = true
   ) {
-    // Get canvas witdh
+    // Get canvas witdh or height based on format
     let canvasSize = selectedAspectRatio.canvasSizeFor(imageSize: image.size)
     let canvasSizeValue: CGFloat
     switch selectedAspectRatio {
@@ -418,7 +422,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       canvasSizeValue = canvasSize.height
     }
 
-    // Calculate raw frame amount
+    // Calculate real frame amount value based on image size
     let rawFrameAmount: CGFloat
     switch selectedFrameSizeMode {
     case .fixed:
@@ -426,6 +430,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
     case .proportional:
       rawFrameAmount = selectedFrameAmount / 100 * canvasSizeValue
     }
+    self.rawFrameAmount = rawFrameAmount
 
     // Calculate preview padding
     let previewSizeValue: CGFloat

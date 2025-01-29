@@ -41,7 +41,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
     frameColorMode: FrameColorMode,
     frameColor: UIColor
   ) {
-    // Get canvas size
+    // Get canvas witdh or height based on format
     let sourceImgSize = sourceImage.size
     let canvasSize = aspectRatio.canvasSizeFor(imageSize: sourceImgSize)
     let canvasSizeValue: CGFloat
@@ -52,7 +52,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
       canvasSizeValue = canvasSize.height
     }
 
-    // Calculate raw frame amount
+    // Calculate real frame amount value based on image size
     let rawFrameAmount: CGFloat
     switch frameSizeMode {
     case .fixed:
