@@ -116,7 +116,7 @@ public class DefaultImageSaver: NSObject, ImageSaver {
 
         let blurAmount = FrameColorMode.blurAmountFor(photoSize: sourceImage.size)
         let enlargedRect = FrameColorMode
-          .blurEnlargedSize(photoSize: sourceImage.size)
+          .scale(imageSize: sourceImgSize, frameSize: canvasSize)
           .centered(with: canvasRect)
           .rounded()
 

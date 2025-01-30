@@ -72,9 +72,6 @@ extension CGSize {
   }
 
   var rounded: CGSize {
-    CGSize(
-      width: width.rounded(),
-      height: height.rounded()
-    )
+    CGSize(width: width.rounded(), height: height.rounded())
   }
 }

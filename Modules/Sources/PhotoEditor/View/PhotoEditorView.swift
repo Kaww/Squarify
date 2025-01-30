@@ -280,7 +280,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
       frameColorView
         .overlay {
           if case .imageBlur = selectedFrameColorMode {
-            let enlarged = FrameColorMode.blurEnlargedSize(photoSize: proxy.size)
+            let enlarged = FrameColorMode.scale(imageSize: image.size, frameSize: proxy.size)
             let scale = enlarged.width / proxy.size.width
             Image(uiImage: image)
               .resizable()
