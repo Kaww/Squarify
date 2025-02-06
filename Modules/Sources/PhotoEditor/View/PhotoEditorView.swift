@@ -370,7 +370,7 @@ public struct PhotoEditorView<Saver: ImageSaver>: View {
           VStack(spacing: 8) {
             Text(String(
               format: "_exporting_label".localized,
-              "\(imageSaver.numberOfSavedImages)",
+              "\n\(imageSaver.numberOfSavedImages)",
               "\(editingImages.count)"
             ))
             .contentTransition(.numericText(value: Double(-imageSaver.numberOfSavedImages)))
